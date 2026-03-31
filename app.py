@@ -9,13 +9,7 @@ import json
 from datetime import date, datetime
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 from flask_sqlalchemy import SQLAlchemy
-from dotenv import load_dotenv
 import stripe
-
-load_dotenv()  # loads .env if present — no-op in production
-
-import anthropic
-ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY")
 
 from calculate_blueprint import calculate_blueprint
 
@@ -89,7 +83,6 @@ STRIPE_WEBHOOK_SECRET = os.environ.get("STRIPE_WEBHOOK_SECRET")
 
 PRICE_CONSUMER     = os.environ.get("STRIPE_PRICE_CONSUMER")
 PRICE_PRACTITIONER = os.environ.get("STRIPE_PRICE_PRACTITIONER")
-PRICE_DEEPREAD     = os.environ.get("STRIPE_PRICE_DEEPREAD")
 
 DOMAIN = os.environ.get("DOMAIN", "http://localhost:5000")
 
@@ -231,15 +224,7 @@ def compatibility():
 
 @app.route("/checkout/<tier>")
 def checkout(tier):
-    if tier == "consumer":
-        price_id = PRICE_CONSUMER
-    elif tier == "practitioner":
-        price_id = PRICE_PRACTITIONER
-    elif tier == "deepread":
-        price_id = PRICE_DEEPREAD
-    else:
-        price_id = None
-
+    price_id = PRICE_CONSUMER if tier == "consumer" else PRICE_PRACTITIONER
     if not price_id:
         return "Stripe not configured", 500
     try:
@@ -355,65 +340,6 @@ def list_profiles():
         return jsonify({"error": "Not subscribed"}), 403
     return jsonify({"profiles": [p.to_dict() for p in sub.profiles]})
 
-
-
-# ---------------------------------------------------------------------------
-# AI Summary — Claude Haiku, deep_read tier
-# ---------------------------------------------------------------------------
-@app.route("/summary", methods=["POST"])
-def summary():
-    email = session.get("email")
-    if not email:
-        return jsonify({"error": "Not logged in"}), 403
-
-    sub = Subscriber.query.filter_by(email=email).first()
-    if not sub or sub.tier != "deep_read":
-        return jsonify({"error": "Deep Read tier required"}), 403
-
-    if not ANTHROPIC_API_KEY:
-        return jsonify({"error": "API not configured"}), 500
-
-    data = request.json
-    blueprint = data.get("blueprint")
-    if not blueprint:
-        return jsonify({"error": "No blueprint data"}), 400
-
-    a = blueprint.get("archetype", {})
-    ap = blueprint.get("active_period", {})
-    bc_spread = blueprint.get("birth_card_spread", {})
-    karma = blueprint.get("karma", {}).get("bc_yearly", {})
-    lr = blueprint.get("long_range", {}).get("bc", {})
-
-    prompt = f"""You are a deadpan, actuarial pattern analyst. No mysticism. No wellness language. The math is the math.
-
-Write a 3-paragraph spread summary. Dry, direct, pattern-recognition voice.
-
-BIRTH CARD: {a.get("birth_card")} — {a.get("description", {}).get("title", "")}
-PRC: {a.get("prc")}
-ACTIVE PERIOD: {ap.get("planet")} — card {ap.get("bc_card")} ({ap.get("domain")})
-ACTIVE LENS: {ap.get("interpretation_bc", {}).get("sweet_spot", "") if ap.get("interpretation_bc") else ""}
-ENVIRONMENT: {karma.get("environment") if karma else "—"}
-DISPLACEMENT: {karma.get("displacement") if karma else "—"}
-LONG RANGE: {lr.get("card") if lr else "—"} ({lr.get("planet") if lr else "—"})
-PERIODS: {", ".join([f"{p}:{c}" for p,c in bc_spread.get("periods", {}).items()])}
-
-Paragraph 1: Birth card + PRC structural pattern.
-Paragraph 2: Active period — what is being asked right now.
-Paragraph 3: Yearly atmosphere + long range operating conditions.
-
-2-3 sentences each. No bullets. No headers. No fluff."""
-
-    try:
-        client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
-        message = client.messages.create(
-            model="claude-haiku-4-5-20251001",
-            max_tokens=400,
-            messages=[{"role": "user", "content": prompt}]
-        )
-        text = message.content[0].text
-        return jsonify({"summary": text})
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
 
 # ---------------------------------------------------------------------------
 # Dev login bypass (remove in production)

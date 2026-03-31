@@ -11,807 +11,818 @@
     --ink: #0e0e0e;
     --paper: #f4f0e8;
     --white: #ffffff;
-    --red: #c0392b;
+    --card-red: #c0392b;
     --accent: #c0392b;
     --muted: #7a7060;
     --border: #d4cfc3;
     --panel: #ffffff;
+    --active-bg: #0e0e0e;
+    --active-fg: #f4f0e8;
   }
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: var(--paper); color: var(--ink); font-family: 'DM Mono', monospace; min-height: 100vh; }
-  body::before {
-    content: ''; position: fixed; inset: 0;
-    background-image: linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px);
-    background-size: 40px 40px; opacity: 0.3; pointer-events: none; z-index: 0;
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'DM Mono', monospace;
+    min-height: 100vh;
   }
-  .app { position: relative; z-index: 1; display: grid; grid-template-columns: 240px 1fr; min-height: 100vh; }
-  @media (max-width: 768px) { .app { grid-template-columns: 1fr; } .sidebar { display: none; } }
 
-  /* SIDEBAR */
-  .sidebar { background: var(--ink); color: var(--paper); padding: 28px 20px; display: flex; flex-direction: column; gap: 28px; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
-  .sidebar-logo { font-family: 'Playfair Display', serif; font-size: 1rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 40px 40px;
+    opacity: 0.3;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* --- LAYOUT --- */
+  .app {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    min-height: 100vh;
+  }
+  @media (max-width: 768px) {
+    .app { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+  }
+
+  /* --- SIDEBAR --- */
+  .sidebar {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 32px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+  }
+  .sidebar-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
   .sidebar-logo span { color: var(--accent); }
-  .sidebar-nav { display: flex; flex-direction: column; gap: 3px; }
-  .nav-item { padding: 9px 12px; font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; border-radius: 2px; color: rgba(244,240,232,0.55); transition: all 0.15s; }
-  .nav-item:hover { background: rgba(255,255,255,0.07); color: var(--paper); }
+
+  .sidebar-nav { display: flex; flex-direction: column; gap: 4px; }
+  .nav-item {
+    padding: 10px 14px;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: background 0.15s;
+    color: rgba(244,240,232,0.6);
+  }
+  .nav-item:hover { background: rgba(255,255,255,0.08); color: var(--paper); }
   .nav-item.active { background: var(--accent); color: white; }
-  .sidebar-section-label { font-size: 0.58rem; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(244,240,232,0.35); margin-bottom: 10px; }
-  .profile-list { display: flex; flex-direction: column; gap: 3px; }
-  .profile-item { padding: 7px 12px; font-size: 0.66rem; color: rgba(244,240,232,0.6); cursor: pointer; border-radius: 2px; transition: background 0.15s; }
-  .profile-item:hover { background: rgba(255,255,255,0.07); color: var(--paper); }
+
   .sidebar-profiles { flex: 1; }
-  .sidebar-footer { font-size: 0.58rem; color: rgba(244,240,232,0.3); }
+  .sidebar-section-label {
+    font-size: 0.6rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(244,240,232,0.4);
+    margin-bottom: 12px;
+  }
+  .profile-list { display: flex; flex-direction: column; gap: 4px; }
+  .profile-item {
+    padding: 8px 14px;
+    font-size: 0.68rem;
+    color: rgba(244,240,232,0.7);
+    cursor: pointer;
+    border-radius: 2px;
+    transition: background 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .profile-item:hover { background: rgba(255,255,255,0.08); }
+  .profile-pip {
+    width: 20px;
+    height: 20px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.6rem;
+  }
 
-  /* MAIN */
-  main { padding: 36px 44px; max-width: 880px; }
-  @media (max-width: 900px) { main { padding: 28px 20px; } }
-  .page-header { margin-bottom: 36px; padding-bottom: 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: flex-end; }
-  .page-title { font-family: 'Playfair Display', serif; font-size: 1.7rem; font-weight: 900; }
-  .page-meta { font-size: 0.62rem; color: var(--muted); text-align: right; line-height: 1.8; }
+  .sidebar-footer {
+    font-size: 0.6rem;
+    color: rgba(244,240,232,0.3);
+    letter-spacing: 0.08em;
+  }
 
-  /* TABS */
-  .tabs { display: flex; margin-bottom: 32px; border-bottom: 1px solid var(--border); }
-  .tab { padding: 11px 18px; font-size: 0.66rem; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; color: var(--muted); transition: all 0.15s; }
+  /* --- MAIN --- */
+  main {
+    padding: 40px 48px;
+    max-width: 900px;
+  }
+  @media (max-width: 900px) { main { padding: 32px 24px; } }
+
+  .page-header {
+    margin-bottom: 40px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+  }
+  .page-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem;
+    font-weight: 900;
+  }
+  .page-meta { font-size: 0.65rem; color: var(--muted); letter-spacing: 0.1em; text-align: right; line-height: 1.8; }
+
+  /* --- TABS --- */
+  .tabs {
+    display: flex;
+    gap: 0;
+    margin-bottom: 36px;
+    border-bottom: 1px solid var(--border);
+  }
+  .tab {
+    padding: 12px 20px;
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    color: var(--muted);
+    transition: all 0.15s;
+  }
   .tab:hover { color: var(--ink); }
   .tab.active { color: var(--ink); border-bottom-color: var(--ink); }
+
   .tab-panel { display: none; }
   .tab-panel.active { display: block; }
 
-  /* INPUTS */
-  .input-row { display: flex; gap: 10px; align-items: flex-end; margin-bottom: 28px; flex-wrap: wrap; }
-  .input-group { display: flex; flex-direction: column; gap: 5px; }
-  .input-group label { font-size: 0.58rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); }
-  .input-group input { width: 76px; padding: 9px 12px; border: 1px solid var(--border); background: var(--white); font-family: 'DM Mono', monospace; font-size: 0.82rem; color: var(--ink); outline: none; transition: border-color 0.15s; }
+  /* --- BIRTHDAY INPUT --- */
+  .input-row {
+    display: flex;
+    gap: 12px;
+    align-items: flex-end;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+  }
+  .input-group { display: flex; flex-direction: column; gap: 6px; }
+  .input-group label {
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .input-group input {
+    width: 80px;
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    background: var(--white);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.15s;
+  }
   .input-group input:focus { border-color: var(--ink); }
-  .input-group input.wide { width: 96px; }
-  .btn { padding: 10px 24px; font-family: 'DM Mono', monospace; font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer; border: none; transition: all 0.15s; }
+  .input-group input.wide { width: 100px; }
+
+  .btn {
+    padding: 11px 28px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    cursor: pointer;
+    border: none;
+    transition: all 0.15s;
+  }
   .btn-primary { background: var(--ink); color: var(--paper); }
   .btn-primary:hover { background: var(--accent); }
+  .btn-sm { padding: 8px 16px; font-size: 0.65rem; }
 
-  /* PANELS */
-  .result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
-  @media (max-width: 620px) { .result-grid { grid-template-columns: 1fr; } }
-  .panel { background: var(--panel); border: 1px solid var(--border); padding: 22px; }
-  .panel-label { font-size: 0.56rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+  /* --- RESULT PANELS --- */
+  .result-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  @media (max-width: 640px) { .result-grid { grid-template-columns: 1fr; } }
+
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    padding: 24px;
+  }
+  .panel-label {
+    font-size: 0.58rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
   .panel-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
 
-  /* ARCHETYPE */
-  .archetype-display { display: flex; align-items: center; gap: 18px; }
-  .big-card { width: 58px; height: 82px; background: white; border: 1px solid var(--border); border-radius: 5px; box-shadow: 2px 3px 0 var(--ink); display: flex; flex-direction: column; justify-content: space-between; padding: 7px; flex-shrink: 0; font-family: 'Playfair Display', serif; }
-  .big-card.red { color: var(--red); }
-  .big-card .cc { font-size: 0.75rem; font-weight: 700; line-height: 1; white-space: pre; }
-  .big-card .cc.flip { transform: rotate(180deg); align-self: flex-end; }
-  .big-card .cs { font-size: 1.5rem; text-align: center; }
-  .archetype-title { font-family: 'Playfair Display', serif; font-size: 1rem; font-weight: 700; margin-bottom: 3px; }
-  .archetype-sub { font-size: 0.65rem; color: var(--muted); line-height: 1.5; }
+  /* --- ARCHETYPE CARD --- */
+  .archetype-display {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+  .big-card {
+    width: 64px;
+    height: 90px;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    box-shadow: 2px 3px 0 var(--ink);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 8px;
+    flex-shrink: 0;
+    font-family: 'Playfair Display', serif;
+  }
+  .big-card.red { color: var(--card-red); }
+  .big-card .c-corner { font-size: 0.8rem; font-weight: 700; line-height: 1; }
+  .big-card .c-corner.flip { transform: rotate(180deg); align-self: flex-end; }
+  .big-card .c-suit { font-size: 1.6rem; text-align: center; }
+  .archetype-info {}
+  .archetype-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .archetype-sub { font-size: 0.68rem; color: var(--muted); line-height: 1.6; }
 
-  /* TAPPABLE CARD CHIPS */
-  .card-chip { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border: 1px solid var(--border); background: var(--paper); cursor: pointer; font-size: 0.72rem; font-weight: 500; transition: all 0.15s; user-select: none; }
-  .card-chip:hover { background: var(--ink); color: var(--paper); border-color: var(--ink); }
-  .card-chip:hover .chip-suit { color: var(--paper) !important; }
-  .card-chip:hover .tap-hint { color: rgba(244,240,232,0.4) !important; }
-  .card-chip.red-card .chip-suit { color: var(--red); }
-  .card-chip .tap-hint { font-size: 0.5rem; color: var(--muted); }
-
-  /* PERIODS TABLE */
+  /* --- PERIODS TABLE --- */
   .periods-table { width: 100%; border-collapse: collapse; }
   .periods-table tr { border-bottom: 1px solid var(--border); }
   .periods-table tr:last-child { border-bottom: none; }
-  .periods-table td { padding: 8px 0; font-size: 0.7rem; }
-  .periods-table td:first-child { color: var(--muted); width: 85px; }
-  .periods-table td:last-child { text-align: right; }
-  .active-row td:first-child { color: var(--accent) !important; font-weight: 500; }
-  .active-badge { display: inline-block; background: var(--accent); color: white; font-size: 0.5rem; letter-spacing: 0.1em; padding: 2px 5px; margin-left: 6px; text-transform: uppercase; vertical-align: middle; }
+  .periods-table td {
+    padding: 9px 0;
+    font-size: 0.72rem;
+  }
+  .periods-table td:first-child { color: var(--muted); width: 90px; }
+  .periods-table td:last-child { text-align: right; font-weight: 500; }
+  .active-row td { color: var(--ink) !important; }
+  .active-row td:first-child {
+    color: var(--accent) !important;
+    font-weight: 500;
+  }
+  .active-badge {
+    display: inline-block;
+    background: var(--accent);
+    color: white;
+    font-size: 0.55rem;
+    letter-spacing: 0.1em;
+    padding: 2px 6px;
+    margin-left: 8px;
+    text-transform: uppercase;
+  }
 
-  /* ACTIVE PERIOD */
-  .period-detail { padding: 18px; background: var(--ink); color: var(--paper); }
-  .period-detail-header { font-size: 0.56rem; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(244,240,232,0.45); margin-bottom: 10px; }
-  .period-planet { font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 700; margin-bottom: 3px; }
-  .period-domain { font-size: 0.65rem; color: rgba(244,240,232,0.55); margin-bottom: 16px; }
-  .lens-block { margin-bottom: 12px; }
-  .lens-label { font-size: 0.55rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent); margin-bottom: 3px; }
-  .lens-text { font-size: 0.7rem; line-height: 1.6; color: rgba(244,240,232,0.82); }
+  /* --- ACTIVE PERIOD DETAIL --- */
+  .period-detail {
+    margin-top: 16px;
+    padding: 20px;
+    background: var(--ink);
+    color: var(--paper);
+  }
+  .period-detail-header {
+    font-size: 0.6rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(244,240,232,0.5);
+    margin-bottom: 12px;
+  }
+  .period-planet {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .period-domain { font-size: 0.68rem; color: rgba(244,240,232,0.6); margin-bottom: 20px; }
+  .lens-block { margin-bottom: 14px; }
+  .lens-label {
+    font-size: 0.58rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 4px;
+  }
+  .lens-text { font-size: 0.72rem; line-height: 1.6; color: rgba(244,240,232,0.85); }
 
-  /* ATMOSPHERE */
+  /* --- ATMOSPHERE --- */
   .atm-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  .atm-label { font-size: 0.56rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 5px; }
-  .atm-card { font-family: 'Playfair Display', serif; font-size: 1.3rem; font-weight: 700; }
-  .atm-card.red { color: var(--red); }
+  .atm-item { }
+  .atm-label { font-size: 0.58rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+  .atm-card {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+  }
+  .atm-card.red { color: var(--card-red); }
 
-  /* AI SUMMARY */
-  .summary-box { background: var(--ink); color: var(--paper); padding: 24px; margin-top: 14px; }
-  .summary-label { font-size: 0.56rem; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(244,240,232,0.4); margin-bottom: 14px; display: flex; align-items: center; gap: 10px; }
-  .summary-label::after { content: ''; flex: 1; height: 1px; background: rgba(244,240,232,0.15); }
-  .summary-text { font-size: 0.78rem; line-height: 1.85; color: rgba(244,240,232,0.88); }
-  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
-  .summary-loading { font-size: 0.7rem; color: rgba(244,240,232,0.4); font-style: italic; }
-  .summary-loading span { animation: blink 1.2s ease infinite; }
-  .upgrade-nudge { font-size: 0.68rem; color: rgba(244,240,232,0.5); line-height: 1.7; }
-  .upgrade-nudge a { color: var(--accent); text-decoration: none; }
+  /* --- COMPATIBILITY --- */
+  .compat-split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  @media (max-width: 640px) { .compat-split { grid-template-columns: 1fr; } }
 
-  /* CARD MODAL */
-  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(14,14,14,0.78); z-index: 100; align-items: flex-end; justify-content: center; }
-  .modal-overlay.open { display: flex; }
-  @media (min-width: 600px) { .modal-overlay { align-items: center; } }
-  .modal { background: var(--panel); width: 100%; max-width: 460px; padding: 28px 28px 36px; position: relative; border-top: 3px solid var(--ink); }
-  @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-  .modal { animation: slideUp 0.22s ease; }
-  .modal-close { position: absolute; top: 14px; right: 14px; font-size: 1.1rem; cursor: pointer; color: var(--muted); background: none; border: none; line-height: 1; }
-  .modal-header { display: flex; align-items: center; gap: 16px; margin-bottom: 18px; }
-  .modal-card { width: 50px; height: 70px; background: white; border: 1px solid var(--border); border-radius: 5px; box-shadow: 2px 3px 0 var(--ink); display: flex; flex-direction: column; justify-content: space-between; padding: 6px; font-family: 'Playfair Display', serif; flex-shrink: 0; }
-  .modal-card.red { color: var(--red); }
-  .modal-card .mcc { font-size: 0.68rem; font-weight: 700; line-height: 1; white-space: pre; }
-  .modal-card .mcc.flip { transform: rotate(180deg); align-self: flex-end; }
-  .modal-card .mcs { font-size: 1.2rem; text-align: center; }
-  .modal-card-name { font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 700; }
-  .modal-card-planet { font-size: 0.63rem; color: var(--muted); margin-top: 2px; }
-  .modal-divider { height: 1px; background: var(--border); margin: 14px 0; }
-  .modal-lens { margin-bottom: 14px; }
-  .modal-lens-label { font-size: 0.54rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent); margin-bottom: 4px; }
-  .modal-lens-text { font-size: 0.72rem; line-height: 1.65; color: var(--ink); }
-  .modal-no-data { font-size: 0.72rem; color: var(--muted); font-style: italic; }
+  .compat-panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    padding: 20px;
+  }
+  .compat-panel-label { font-size: 0.6rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
+  .compat-bc { font-family: 'Playfair Display', serif; font-size: 1.3rem; font-weight: 700; margin-bottom: 2px; }
+  .compat-bc.red { color: var(--card-red); }
+  .compat-sub { font-size: 0.68rem; color: var(--muted); }
 
-  /* COMPAT */
-  .compat-split { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
-  @media (max-width: 580px) { .compat-split { grid-template-columns: 1fr; } }
-  .compat-panel { background: var(--panel); border: 1px solid var(--border); padding: 18px; }
-  .compat-panel-label { font-size: 0.58rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
-  .compat-bc { font-family: 'Playfair Display', serif; font-size: 1.2rem; font-weight: 700; margin-bottom: 2px; }
-  .compat-bc.red { color: var(--red); }
-  .compat-sub { font-size: 0.65rem; color: var(--muted); }
-  .overlay-panel { background: var(--ink); color: var(--paper); padding: 22px; margin-bottom: 14px; }
-  .overlay-title { font-family: 'Playfair Display', serif; font-size: 0.95rem; font-weight: 700; margin-bottom: 14px; }
-  .overlay-item { padding: 9px 0; border-bottom: 1px solid rgba(244,240,232,0.1); font-size: 0.7rem; color: rgba(244,240,232,0.78); display: flex; gap: 10px; align-items: flex-start; }
+  .overlay-panel {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 24px;
+    margin-bottom: 20px;
+  }
+  .overlay-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 16px;
+  }
+  .overlay-item {
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(244,240,232,0.1);
+    font-size: 0.72rem;
+    color: rgba(244,240,232,0.8);
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
   .overlay-item:last-child { border-bottom: none; }
-  .overlay-icon { color: var(--accent); flex-shrink: 0; }
+  .overlay-icon { color: var(--accent); flex-shrink: 0; margin-top: 2px; }
+  .overlay-empty { font-size: 0.72rem; color: rgba(244,240,232,0.4); font-style: italic; }
 
-  .divider { height: 1px; background: var(--border); margin: 18px 0; }
-  .loading { display: none; padding: 36px; text-align: center; font-size: 0.68rem; color: var(--muted); letter-spacing: 0.1em; }
+  /* --- LOADING --- */
+  .loading {
+    display: none;
+    padding: 40px;
+    text-align: center;
+    font-size: 0.7rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+  }
   .loading.show { display: block; }
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
   .loading span { animation: pulse 1.2s ease infinite; }
+
+  /* --- MISC --- */
   .hidden { display: none !important; }
-  @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-  .animate-in { animation: fadeUp 0.3s ease both; }
-  .tag { display: inline-block; padding: 2px 7px; font-size: 0.55rem; letter-spacing: 0.1em; text-transform: uppercase; background: var(--paper); border: 1px solid var(--border); color: var(--muted); }
+  .divider { height: 1px; background: var(--border); margin: 24px 0; }
+  .tag {
+    display: inline-block;
+    padding: 3px 8px;
+    font-size: 0.58rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    background: var(--paper);
+    border: 1px solid var(--border);
+    color: var(--muted);
+  }
   .tag.green { background: #e8f5e9; border-color: #a5d6a7; color: #2e7d32; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .animate-in { animation: fadeUp 0.35s ease both; }
 </style>
 </head>
 <body>
 <div class="app">
+
+  <!-- SIDEBAR -->
   <aside class="sidebar">
     <div class="sidebar-logo">Card <span>Blueprints</span></div>
+
     <nav class="sidebar-nav">
       <div class="nav-item active" onclick="showTab('blueprint')">Blueprint</div>
       <div class="nav-item" onclick="showTab('compatibility')">Compatibility</div>
-      {% if tier == 'practitioner' %}<div class="nav-item" onclick="showTab('profiles')">Profiles</div>{% endif %}
+      {% if tier == 'practitioner' %}
+      <div class="nav-item" onclick="showTab('profiles')">Profiles</div>
+      {% endif %}
     </nav>
+
     <div class="sidebar-profiles">
       <div class="sidebar-section-label">Saved Profiles</div>
       <div class="profile-list" id="profileList">
-        <div class="profile-item" style="color:rgba(244,240,232,0.28);font-style:italic;font-size:0.65rem">No profiles yet</div>
+        <div class="profile-item" style="color:rgba(244,240,232,0.3);font-style:italic">
+          No profiles yet
+        </div>
       </div>
     </div>
-    <div class="sidebar-footer">{{ email }}<br><span class="tag">{{ tier }}</span></div>
+
+    <div class="sidebar-footer">
+      {{ email }}<br>
+      <span class="tag">{{ tier }}</span>
+    </div>
   </aside>
 
+  <!-- MAIN -->
   <main>
     <div class="page-header">
       <h1 class="page-title">Dashboard</h1>
-      <div class="page-meta"><span id="todayDate"></span><br><span class="tag green">{{ tier }}</span></div>
+      <div class="page-meta">
+        Today: <strong id="todayDate"></strong><br>
+        <span id="tierBadge" class="tag green">{{ tier }}</span>
+      </div>
     </div>
+
+    <!-- TABS -->
     <div class="tabs">
       <div class="tab active" id="tab-blueprint" onclick="showTab('blueprint')">Blueprint</div>
       <div class="tab" id="tab-compatibility" onclick="showTab('compatibility')">Compatibility</div>
       {% if tier == 'practitioner' %}<div class="tab" id="tab-profiles" onclick="showTab('profiles')">Profiles</div>{% endif %}
     </div>
 
-    <!-- BLUEPRINT -->
+    <!-- ======================== BLUEPRINT TAB ======================== -->
     <div class="tab-panel active" id="panel-blueprint">
+
       <div class="input-row">
-        <div class="input-group"><label>Month</label><input type="number" id="bp-month" min="1" max="12" placeholder="MM" class="wide"></div>
-        <div class="input-group"><label>Day</label><input type="number" id="bp-day" min="1" max="31" placeholder="DD" class="wide"></div>
-        <div class="input-group"><label>Year</label><input type="number" id="bp-year" min="1900" max="2010" placeholder="YYYY" style="width:106px"></div>
+        <div class="input-group">
+          <label>Month</label>
+          <input type="number" id="bp-month" min="1" max="12" placeholder="MM" class="wide">
+        </div>
+        <div class="input-group">
+          <label>Day</label>
+          <input type="number" id="bp-day" min="1" max="31" placeholder="DD" class="wide">
+        </div>
+        <div class="input-group">
+          <label>Year</label>
+          <input type="number" id="bp-year" min="1900" max="2010" placeholder="YYYY" style="width:110px">
+        </div>
         <button class="btn btn-primary" onclick="runBlueprint()">Calculate</button>
       </div>
+
       <div class="loading" id="bp-loading"><span>Calculating blueprint...</span></div>
+
       <div id="bp-results" class="hidden">
 
+        <!-- Archetype row -->
         <div class="result-grid animate-in">
           <div class="panel">
             <div class="panel-label">Birth Card</div>
             <div class="archetype-display">
-              <div class="big-card" id="bc-visual"><div class="cc" id="bc-top"></div><div class="cs" id="bc-suit"></div><div class="cc flip" id="bc-bot"></div></div>
-              <div><div class="archetype-title" id="bc-title"></div><div class="archetype-sub" id="bc-core"></div></div>
+              <div class="big-card" id="bc-card-visual">
+                <div class="c-corner" id="bc-corner-top"></div>
+                <div class="c-suit" id="bc-suit-center"></div>
+                <div class="c-corner flip" id="bc-corner-bot"></div>
+              </div>
+              <div class="archetype-info">
+                <div class="archetype-title" id="bc-title"></div>
+                <div class="archetype-sub" id="bc-core"></div>
+              </div>
             </div>
           </div>
           <div class="panel">
             <div class="panel-label">Planetary Ruling Card</div>
             <div class="archetype-display">
-              <div class="big-card" id="prc-visual"><div class="cc" id="prc-top"></div><div class="cs" id="prc-suit"></div><div class="cc flip" id="prc-bot"></div></div>
-              <div><div class="archetype-title" id="prc-label"></div><div class="archetype-sub" id="prc-core"></div></div>
+              <div class="big-card" id="prc-card-visual">
+                <div class="c-corner" id="prc-corner-top"></div>
+                <div class="c-suit" id="prc-suit-center"></div>
+                <div class="c-corner flip" id="prc-corner-bot"></div>
+              </div>
+              <div class="archetype-info">
+                <div class="archetype-title" id="prc-card-label"></div>
+                <div class="archetype-sub" id="prc-core"></div>
+              </div>
             </div>
           </div>
         </div>
 
-        <div class="result-grid animate-in" style="animation-delay:0.08s">
+        <!-- Periods + Active Detail -->
+        <div class="result-grid animate-in" style="animation-delay:0.1s">
           <div class="panel">
-            <div class="panel-label">Planetary Periods <span style="font-size:0.48rem;color:var(--muted);font-style:italic;margin-left:2px">tap to read</span></div>
+            <div class="panel-label">Planetary Periods</div>
             <table class="periods-table" id="periodsTable"></table>
             <div class="divider"></div>
-            <div style="display:flex;justify-content:space-between;font-size:0.65rem;color:var(--muted)">
+            <div style="display:flex;justify-content:space-between;font-size:0.68rem;color:var(--muted)">
               <span>Pluto: <strong id="plutoCard" style="color:var(--ink)"></strong></span>
               <span>Result: <strong id="resultCard" style="color:var(--ink)"></strong></span>
             </div>
           </div>
           <div class="panel">
             <div class="panel-label">Active Period</div>
-            <div id="activePeriodDetail"></div>
+            <div class="period-detail" id="activePeriodDetail"></div>
           </div>
         </div>
 
-        <div class="result-grid animate-in" style="animation-delay:0.16s">
+        <!-- Atmosphere + Long Range -->
+        <div class="result-grid animate-in" style="animation-delay:0.2s">
           <div class="panel">
             <div class="panel-label">Yearly Atmosphere</div>
             <div class="atm-grid">
-              <div><div class="atm-label">Environment</div><div class="atm-card" id="atmEnv"></div></div>
-              <div><div class="atm-label">Displacement</div><div class="atm-card" id="atmDisp"></div></div>
+              <div class="atm-item">
+                <div class="atm-label">Environment (Support)</div>
+                <div class="atm-card" id="atmEnv"></div>
+              </div>
+              <div class="atm-item">
+                <div class="atm-label">Displacement (Tax)</div>
+                <div class="atm-card" id="atmDisp"></div>
+              </div>
             </div>
           </div>
           <div class="panel">
             <div class="panel-label">Long Range Theme</div>
             <div class="atm-grid">
-              <div><div class="atm-label">Card</div><div class="atm-card" id="lrCard"></div></div>
-              <div><div class="atm-label">Planet</div><div class="atm-card" id="lrPlanet" style="font-size:0.85rem;font-family:'DM Mono',monospace;font-weight:400"></div></div>
+              <div class="atm-item">
+                <div class="atm-label">Theme Card</div>
+                <div class="atm-card" id="lrCard"></div>
+              </div>
+              <div class="atm-item">
+                <div class="atm-label">Planet</div>
+                <div class="atm-card" id="lrPlanet" style="font-size:0.9rem;font-family:'DM Mono',monospace"></div>
+              </div>
             </div>
           </div>
         </div>
 
-        <div class="summary-box animate-in" style="animation-delay:0.24s">
-          <div class="summary-label">Spread Summary</div>
-          <div id="summaryContent">
-            {% if tier in ('deepread', 'practitioner') %}
-            <div class="summary-loading"><span>Generating summary...</span></div>
-            {% else %}
-            <div class="upgrade-nudge">AI spread summaries available on <a href="/checkout/deepread">Deep Read — $49/mo</a>. Tap any card above for its full three-lens interpretation.</div>
-            {% endif %}
-          </div>
-        </div>
-
-
-        <!-- SHARE BUTTON -->
-        <div class="animate-in" style="animation-delay:0.32s;margin-top:14px;display:flex;gap:10px;align-items:center">
-          <button class="btn btn-primary" onclick="shareBlueprint()" id="shareBtn" style="display:flex;align-items:center;gap:8px">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-            Share Blueprint
-          </button>
-          <span id="shareStatus" style="font-size:0.65rem;color:var(--muted)"></span>
-        </div>
-        <canvas id="shareCanvas" style="display:none"></canvas>
       </div>
     </div>
 
-    <!-- COMPATIBILITY -->
+    <!-- ======================== COMPATIBILITY TAB ======================== -->
     <div class="tab-panel" id="panel-compatibility">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:14px">
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:16px">
         <div>
-          <div style="font-size:0.58rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);margin-bottom:10px">Person 1</div>
+          <div style="font-size:0.6rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);margin-bottom:12px">Person 1</div>
           <div class="input-row" style="margin-bottom:0;flex-wrap:wrap">
             <div class="input-group"><label>Mo</label><input type="number" id="c1-month" min="1" max="12" placeholder="MM"></div>
             <div class="input-group"><label>Day</label><input type="number" id="c1-day" min="1" max="31" placeholder="DD"></div>
-            <div class="input-group"><label>Year</label><input type="number" id="c1-year" min="1900" max="2010" placeholder="YYYY" style="width:96px"></div>
+            <div class="input-group"><label>Year</label><input type="number" id="c1-year" min="1900" max="2010" placeholder="YYYY" style="width:100px"></div>
           </div>
         </div>
         <div>
-          <div style="font-size:0.58rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);margin-bottom:10px">Person 2</div>
+          <div style="font-size:0.6rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);margin-bottom:12px">Person 2</div>
           <div class="input-row" style="margin-bottom:0;flex-wrap:wrap">
             <div class="input-group"><label>Mo</label><input type="number" id="c2-month" min="1" max="12" placeholder="MM"></div>
             <div class="input-group"><label>Day</label><input type="number" id="c2-day" min="1" max="31" placeholder="DD"></div>
-            <div class="input-group"><label>Year</label><input type="number" id="c2-year" min="1900" max="2010" placeholder="YYYY" style="width:96px"></div>
+            <div class="input-group"><label>Year</label><input type="number" id="c2-year" min="1900" max="2010" placeholder="YYYY" style="width:100px"></div>
           </div>
         </div>
       </div>
-      <button class="btn btn-primary" onclick="runCompatibility()" style="margin-bottom:28px">Run Compatibility</button>
+      <button class="btn btn-primary" onclick="runCompatibility()" style="margin-bottom:32px">Run Compatibility</button>
+
       <div class="loading" id="compat-loading"><span>Running overlay...</span></div>
+
       <div id="compat-results" class="hidden">
+
         <div class="compat-split animate-in">
           <div class="compat-panel">
             <div class="compat-panel-label">Person 1</div>
             <div class="compat-bc" id="c1-bc"></div>
             <div class="compat-sub" id="c1-sub"></div>
             <div class="divider"></div>
-            <div style="font-size:0.65rem;color:var(--muted)">Active: <strong id="c1-active" style="color:var(--ink)"></strong></div>
+            <div style="font-size:0.68rem;color:var(--muted)">Active: <strong id="c1-active" style="color:var(--ink)"></strong></div>
           </div>
           <div class="compat-panel">
             <div class="compat-panel-label">Person 2</div>
             <div class="compat-bc" id="c2-bc"></div>
             <div class="compat-sub" id="c2-sub"></div>
             <div class="divider"></div>
-            <div style="font-size:0.65rem;color:var(--muted)">Active: <strong id="c2-active" style="color:var(--ink)"></strong></div>
+            <div style="font-size:0.68rem;color:var(--muted)">Active: <strong id="c2-active" style="color:var(--ink)"></strong></div>
           </div>
         </div>
-        <div class="overlay-panel animate-in" style="animation-delay:0.08s">
+
+        <div class="overlay-panel animate-in" style="animation-delay:0.1s">
           <div class="overlay-title">Compatibility Overlay</div>
           <div id="overlayItems"></div>
         </div>
+
       </div>
     </div>
 
   </main>
 </div>
 
-<!-- CARD MODAL -->
-<div class="modal-overlay" id="cardModal" onclick="closeModal(event)">
-  <div class="modal">
-    <button class="modal-close" onclick="closeModalDirect()">✕</button>
-    <div class="modal-header">
-      <div class="modal-card" id="modal-card-visual">
-        <div class="mcc" id="modal-top"></div>
-        <div class="mcs" id="modal-suit-center"></div>
-        <div class="mcc flip" id="modal-bot"></div>
-      </div>
-      <div>
-        <div class="modal-card-name" id="modal-card-name"></div>
-        <div class="modal-card-planet" id="modal-card-planet"></div>
-      </div>
-    </div>
-    <div class="modal-divider"></div>
-    <div id="modal-body"></div>
-  </div>
-</div>
-
 <script>
-const TIER = "{{ tier }}";
-document.getElementById('todayDate').textContent = new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
+const TODAY = new Date();
+document.getElementById('todayDate').textContent = TODAY.toLocaleDateString('en-US', {month:'long',day:'numeric',year:'numeric'});
 
-function isRed(c) { return c && (c.includes('♥') || c.includes('♦')); }
-function cardParts(c) {
-  if (!c) return {rank:'?',suit:'?'};
-  for (const s of ['♥','♦','♣','♠']) { if (c.includes(s)) return {rank:c.replace(s,'').trim(), suit:s}; }
-  return {rank:c, suit:''};
+function isRed(card) {
+  return card && (card.includes('♥') || card.includes('♦'));
 }
-function renderBigCard(el, card) {
-  const {rank, suit} = cardParts(card);
-  const label = rank + '\n' + suit;
-  el.querySelector('.cc').textContent = label;
-  el.querySelector('.cc.flip').textContent = label;
-  el.querySelector('.cs').textContent = suit;
-  el.className = el.className.replace(/ ?red/g,'') + (isRed(card) ? ' red' : '');
+
+function cardParts(card) {
+  if (!card) return { rank: '?', suit: '?' };
+  const suits = { '♥':'♥','♦':'♦','♣':'♣','♠':'♠' };
+  let suit = '';
+  for (const s of Object.keys(suits)) {
+    if (card.includes(s)) { suit = s; break; }
+  }
+  const rank = card.replace(suit,'').trim();
+  return { rank, suit };
+}
+
+function renderCard(el, card) {
+  const { rank, suit } = cardParts(card);
+  const topEl = el.querySelector('.c-corner');
+  const botEl = el.querySelector('.c-corner.flip');
+  const suitEl = el.querySelector('.c-suit');
+  if (topEl) topEl.textContent = rank + '\n' + suit;
+  if (botEl) botEl.textContent = rank + '\n' + suit;
+  if (suitEl) suitEl.textContent = suit;
+  el.className = 'big-card' + (isRed(card) ? ' red' : '');
 }
 
 function showTab(name) {
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.getElementById('panel-'+name)?.classList.add('active');
-  document.getElementById('tab-'+name)?.classList.add('active');
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.toggle('active', n.textContent.trim().toLowerCase()===name));
+  document.getElementById('panel-' + name)?.classList.add('active');
+  document.getElementById('tab-' + name)?.classList.add('active');
+  // also handle sidebar
+  document.querySelectorAll('.nav-item').forEach(n => {
+    n.classList.toggle('active', n.textContent.toLowerCase().includes(name));
+  });
 }
-
-function makeChip(card, planet, interp) {
-  const {rank, suit} = cardParts(card);
-  const el = document.createElement('span');
-  el.className = 'card-chip' + (isRed(card) ? ' red-card' : '');
-  el.innerHTML = `<span>${rank}</span><span class="chip-suit" style="${isRed(card)?'color:var(--red)':''}">${suit}</span><span class="tap-hint">↗</span>`;
-  el.onclick = () => openCardModal(card, planet, interp);
-  return el;
-}
-
-function openCardModal(card, planet, interp) {
-  const {rank, suit} = cardParts(card);
-  const label = rank + '\n' + suit;
-  const mv = document.getElementById('modal-card-visual');
-  document.getElementById('modal-top').textContent = label;
-  document.getElementById('modal-bot').textContent = label;
-  document.getElementById('modal-suit-center').textContent = suit;
-  mv.className = 'modal-card' + (isRed(card) ? ' red' : '');
-  document.getElementById('modal-card-name').textContent = card;
-  document.getElementById('modal-card-planet').textContent = planet ? `${planet} Period` : '';
-  const body = document.getElementById('modal-body');
-  if (interp && (interp.under || interp.sweet_spot || interp.over)) {
-    body.innerHTML = `
-      <div class="modal-lens"><div class="modal-lens-label">Under</div><div class="modal-lens-text">${interp.under||'—'}</div></div>
-      <div class="modal-lens"><div class="modal-lens-label">Sweet Spot</div><div class="modal-lens-text">${interp.sweet_spot||'—'}</div></div>
-      <div class="modal-lens"><div class="modal-lens-label">Over</div><div class="modal-lens-text">${interp.over||'—'}</div></div>
-    `;
-  } else {
-    body.innerHTML = '<div class="modal-no-data">No interpretation data for this card.</div>';
-  }
-  document.getElementById('cardModal').classList.add('open');
-  document.body.style.overflow = 'hidden';
-}
-function closeModal(e) { if (e.target.id==='cardModal') closeModalDirect(); }
-function closeModalDirect() { document.getElementById('cardModal').classList.remove('open'); document.body.style.overflow=''; }
-document.addEventListener('keydown', e => { if (e.key==='Escape') closeModalDirect(); });
 
 async function runBlueprint() {
-  const m = document.getElementById('bp-month').value;
-  const d = document.getElementById('bp-day').value;
-  const y = document.getElementById('bp-year').value;
-  if (!m||!d||!y) return;
+  const month = document.getElementById('bp-month').value;
+  const day = document.getElementById('bp-day').value;
+  const year = document.getElementById('bp-year').value;
+  if (!month || !day || !year) return;
+
   document.getElementById('bp-loading').classList.add('show');
   document.getElementById('bp-results').classList.add('hidden');
-  const res = await fetch('/calculate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({month:+m,day:+d,year:+y})});
+
+  const res = await fetch('/calculate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ month: +month, day: +day, year: +year })
+  });
   const data = await res.json();
+
   document.getElementById('bp-loading').classList.remove('show');
   if (data.error) { alert(data.error); return; }
+
   renderBlueprint(data);
   document.getElementById('bp-results').classList.remove('hidden');
-  if (TIER==='deepread'||TIER==='practitioner') fetchSummary(data);
 }
 
 function renderBlueprint(data) {
-  const a=data.archetype, bc=data.birth_card_spread, ap=data.active_period;
-  const karma=data.karma?.bc_yearly, lr=data.long_range?.bc;
+  const a = data.archetype;
+  const bc = data.birth_card_spread;
+  const ap = data.active_period;
+  const karma = data.karma?.bc_yearly;
+  const lr = data.long_range?.bc;
 
-  renderBigCard(document.getElementById('bc-visual'), a.birth_card);
+  // Birth card
+  renderCard(document.getElementById('bc-card-visual'), a.birth_card);
   document.getElementById('bc-title').textContent = a.description?.title || a.birth_card;
-  document.getElementById('bc-core').textContent = (a.description?.core_identity||'').slice(0,110)+'...';
+  document.getElementById('bc-core').textContent = (a.description?.core_identity || '').slice(0, 120) + '...';
 
-  renderBigCard(document.getElementById('prc-visual'), a.prc);
-  document.getElementById('prc-label').textContent = a.prc;
-  document.getElementById('prc-core').textContent = (a.prc_description?.core_identity||'').slice(0,110)+'...';
+  // PRC
+  renderCard(document.getElementById('prc-card-visual'), a.prc);
+  document.getElementById('prc-card-label').textContent = a.prc;
+  document.getElementById('prc-core').textContent = (a.prc_description?.core_identity || '').slice(0, 120) + '...';
 
+  // Periods table
   const planets = ['Mercury','Venus','Mars','Jupiter','Saturn','Uranus','Neptune'];
   const table = document.getElementById('periodsTable');
-  table.innerHTML = '';
-  const detailed = bc.periods_detailed || {};
-  planets.forEach(p => {
-    const card = bc.periods[p]||'—';
-    const isActive = p===ap.planet;
-    const interp = detailed[p]?.interpretation || null;
-    const tr = document.createElement('tr');
-    if (isActive) tr.className = 'active-row';
-    const td1 = document.createElement('td');
-    td1.innerHTML = p + (isActive?'<span class="active-badge">now</span>':'');
-    const td2 = document.createElement('td');
-    if (card!=='—') td2.appendChild(makeChip(card, p, interp));
-    else td2.textContent = '—';
-    tr.append(td1,td2); table.appendChild(tr);
-  });
+  table.innerHTML = planets.map(p => {
+    const card = bc.periods[p] || '—';
+    const isActive = p === ap.planet;
+    return `<tr class="${isActive ? 'active-row' : ''}">
+      <td>${p}${isActive ? '<span class="active-badge">now</span>' : ''}</td>
+      <td style="color:${isRed(card)?'var(--card-red)':'var(--ink)'}">${card}</td>
+    </tr>`;
+  }).join('');
 
-  document.getElementById('plutoCard').textContent = bc.pluto||'—';
-  document.getElementById('resultCard').textContent = bc.result||'—';
+  document.getElementById('plutoCard').textContent = bc.pluto || '—';
+  document.getElementById('resultCard').textContent = bc.result || '—';
 
+  // Active period detail
   const ib = ap.interpretation_bc;
   document.getElementById('activePeriodDetail').innerHTML = `
-    <div class="period-detail">
-      <div class="period-detail-header">Active Now</div>
-      <div class="period-planet">${ap.planet} · ${ap.bc_card}</div>
-      <div class="period-domain">${ap.domain}</div>
-      ${ib?`<div class="lens-block"><div class="lens-label">Under</div><div class="lens-text">${ib.under}</div></div>
+    <div class="period-detail-header">Active Now</div>
+    <div class="period-planet">${ap.planet} · ${ap.bc_card}</div>
+    <div class="period-domain">${ap.domain}</div>
+    ${ib ? `
+      <div class="lens-block"><div class="lens-label">Under</div><div class="lens-text">${ib.under}</div></div>
       <div class="lens-block"><div class="lens-label">Sweet Spot</div><div class="lens-text">${ib.sweet_spot}</div></div>
-      <div class="lens-block"><div class="lens-label">Over</div><div class="lens-text">${ib.over}</div></div>`
-      :'<div class="lens-text" style="opacity:0.4">No interpretation data</div>'}
-    </div>`;
+      <div class="lens-block"><div class="lens-label">Over</div><div class="lens-text">${ib.over}</div></div>
+    ` : '<div class="lens-text" style="opacity:0.5">No interpretation data</div>'}
+  `;
 
-  const envEl=document.getElementById('atmEnv'); envEl.textContent=karma?.environment||'—'; envEl.className='atm-card'+(isRed(karma?.environment)?' red':'');
-  const dispEl=document.getElementById('atmDisp'); dispEl.textContent=karma?.displacement||'—'; dispEl.className='atm-card'+(isRed(karma?.displacement)?' red':'');
-  const lrEl=document.getElementById('lrCard'); lrEl.textContent=lr?.card||'—'; lrEl.className='atm-card'+(isRed(lr?.card)?' red':'');
-  document.getElementById('lrPlanet').textContent=lr?.planet||'—';
-}
+  // Atmosphere
+  const envCard = karma?.environment || '—';
+  const dispCard = karma?.displacement || '—';
+  document.getElementById('atmEnv').textContent = envCard;
+  document.getElementById('atmEnv').className = 'atm-card' + (isRed(envCard) ? ' red' : '');
+  document.getElementById('atmDisp').textContent = dispCard;
+  document.getElementById('atmDisp').className = 'atm-card' + (isRed(dispCard) ? ' red' : '');
 
-async function fetchSummary(blueprint) {
-  const sc=document.getElementById('summaryContent');
-  sc.innerHTML='<div class="summary-loading"><span>Generating summary...</span></div>';
-  try {
-    const res=await fetch('/summary',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({blueprint})});
-    const data=await res.json();
-    sc.innerHTML = data.summary
-      ? `<div class="summary-text">${data.summary}</div>`
-      : `<div class="summary-loading">Could not generate summary.</div>`;
-  } catch(e) { sc.innerHTML='<div class="summary-loading">Error generating summary.</div>'; }
+  // Long range
+  document.getElementById('lrCard').textContent = lr?.card || '—';
+  document.getElementById('lrCard').className = 'atm-card' + (isRed(lr?.card) ? ' red' : '');
+  document.getElementById('lrPlanet').textContent = lr?.planet || '—';
 }
 
 async function runCompatibility() {
-  const f=['c1-month','c1-day','c1-year','c2-month','c2-day','c2-year'].map(id=>document.getElementById(id).value);
-  if (f.some(v=>!v)) return;
+  const fields = ['c1-month','c1-day','c1-year','c2-month','c2-day','c2-year'];
+  const vals = fields.map(f => document.getElementById(f).value);
+  if (vals.some(v => !v)) return;
+
   document.getElementById('compat-loading').classList.add('show');
   document.getElementById('compat-results').classList.add('hidden');
-  const res=await fetch('/compatibility',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({p1_month:+f[0],p1_day:+f[1],p1_year:+f[2],p2_month:+f[3],p2_day:+f[4],p2_year:+f[5]})});
-  const data=await res.json();
+
+  const res = await fetch('/compatibility', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      p1_month: +vals[0], p1_day: +vals[1], p1_year: +vals[2],
+      p2_month: +vals[3], p2_day: +vals[4], p2_year: +vals[5],
+    })
+  });
+  const data = await res.json();
+
   document.getElementById('compat-loading').classList.remove('show');
-  if (data.error){alert(data.error);return;}
+  if (data.error) { alert(data.error); return; }
+
   renderCompatibility(data);
   document.getElementById('compat-results').classList.remove('hidden');
 }
 
 function renderCompatibility(data) {
-  const p1=data.person1,p2=data.person2,ov=data.overlay;
-  document.getElementById('c1-bc').textContent=`${p1.archetype.birth_card} · ${p1.archetype.prc}`;
-  document.getElementById('c1-bc').className='compat-bc'+(isRed(p1.archetype.birth_card)?' red':'');
-  document.getElementById('c1-sub').textContent=p1.archetype.description?.title||'';
-  document.getElementById('c1-active').textContent=`${ov.p1_active.planet} — ${ov.p1_active.bc_card}`;
-  document.getElementById('c2-bc').textContent=`${p2.archetype.birth_card} · ${p2.archetype.prc}`;
-  document.getElementById('c2-bc').className='compat-bc'+(isRed(p2.archetype.birth_card)?' red':'');
-  document.getElementById('c2-sub').textContent=p2.archetype.description?.title||'';
-  document.getElementById('c2-active').textContent=`${ov.p2_active.planet} — ${ov.p2_active.bc_card}`;
-  const items=[];
-  if(ov.mirror) items.push({icon:'★',text:`Card Mirror: ${ov.mirror.type} — ${ov.mirror.card}. One person's identity card is the other's ruling mechanism.`});
-  ov.shared_period_cards?.forEach(c=>items.push({icon:'◆',text:`Shared period card: ${c} appears in both yearly spreads.`}));
-  ov.karma_crossover?.forEach(k=>items.push({icon:'↔',text:`Karma crossover: ${k}`}));
-  if(!items.length) items.push({icon:'—',text:'No direct card overlaps detected this year.'});
-  document.getElementById('overlayItems').innerHTML=items.map(i=>`<div class="overlay-item"><span class="overlay-icon">${i.icon}</span><span>${i.text}</span></div>`).join('');
-}
+  const p1 = data.person1;
+  const p2 = data.person2;
+  const ov = data.overlay;
 
-// ── SHARE BLUEPRINT ─────────────────────────────────────────────────────────
-function drawCard(ctx, card, x, y, w, h) {
-  const {rank, suit} = cardParts(card||'');
-  const red = isRed(card);
-  // card body
-  ctx.fillStyle = '#ffffff';
-  ctx.strokeStyle = '#d4cfc3';
-  ctx.lineWidth = 1;
-  roundRect(ctx, x, y, w, h, 4);
-  ctx.fill(); ctx.stroke();
-  // shadow
-  ctx.strokeStyle = '#0e0e0e';
-  ctx.lineWidth = 1.5;
-  roundRect(ctx, x+2, y+3, w, h, 4);
-  ctx.stroke();
-  // redraw card on top
-  ctx.fillStyle = '#ffffff';
-  ctx.strokeStyle = '#d4cfc3';
-  ctx.lineWidth = 1;
-  roundRect(ctx, x, y, w, h, 4);
-  ctx.fill(); ctx.stroke();
-  // text
-  ctx.fillStyle = red ? '#c0392b' : '#0e0e0e';
-  ctx.font = `bold ${Math.floor(h*0.16)}px 'Georgia', serif`;
-  ctx.textAlign = 'left';
-  ctx.fillText(rank, x+5, y+h*0.22);
-  ctx.font = `${Math.floor(h*0.14)}px 'Georgia', serif`;
-  ctx.fillText(suit, x+5, y+h*0.34);
-  // center suit
-  ctx.font = `${Math.floor(h*0.42)}px 'Georgia', serif`;
-  ctx.textAlign = 'center';
-  ctx.fillText(suit, x+w/2, y+h*0.65);
-  // bottom corner (rotated)
-  ctx.save();
-  ctx.translate(x+w-5, y+h-5);
-  ctx.rotate(Math.PI);
-  ctx.font = `bold ${Math.floor(h*0.16)}px 'Georgia', serif`;
-  ctx.textAlign = 'left';
-  ctx.fillStyle = red ? '#c0392b' : '#0e0e0e';
-  ctx.fillText(rank, 0, h*0.12);
-  ctx.font = `${Math.floor(h*0.14)}px 'Georgia', serif`;
-  ctx.fillText(suit, 0, h*0.24);
-  ctx.restore();
-}
+  // Person panels
+  const p1bc = p1.archetype.birth_card;
+  const p2bc = p2.archetype.birth_card;
+  document.getElementById('c1-bc').textContent = `${p1bc} · ${p1.archetype.prc}`;
+  document.getElementById('c1-bc').className = 'compat-bc' + (isRed(p1bc) ? ' red' : '');
+  document.getElementById('c1-sub').textContent = p1.archetype.description?.title || '';
+  document.getElementById('c1-active').textContent = `${ov.p1_active.planet} — ${ov.p1_active.bc_card}`;
 
-function roundRect(ctx, x, y, w, h, r) {
-  ctx.beginPath();
-  ctx.moveTo(x+r, y);
-  ctx.lineTo(x+w-r, y); ctx.arcTo(x+w, y, x+w, y+r, r);
-  ctx.lineTo(x+w, y+h-r); ctx.arcTo(x+w, y+h, x+w-r, y+h, r);
-  ctx.lineTo(x+r, y+h); ctx.arcTo(x, y+h, x, y+h-r, r);
-  ctx.lineTo(x, y+r); ctx.arcTo(x, y, x+r, y, r);
-  ctx.closePath();
-}
+  document.getElementById('c2-bc').textContent = `${p2bc} · ${p2.archetype.prc}`;
+  document.getElementById('c2-bc').className = 'compat-bc' + (isRed(p2bc) ? ' red' : '');
+  document.getElementById('c2-sub').textContent = p2.archetype.description?.title || '';
+  document.getElementById('c2-active').textContent = `${ov.p2_active.planet} — ${ov.p2_active.bc_card}`;
 
-async function shareBlueprint() {
-  if (!window._bp) return;
-  const btn = document.getElementById('shareBtn');
-  const status = document.getElementById('shareStatus');
-  btn.disabled = true;
-  status.textContent = 'Generating...';
+  // Overlay items
+  const items = [];
 
-  const bp = window._bp;
-  const a = bp.archetype;
-  const ap = bp.active_period;
-  const karma = bp.karma?.bc_yearly;
-  const bc = bp.birth_card_spread;
-
-  // Canvas dimensions — portrait, TikTok-friendly ratio
-  const W = 800, H = 1200;
-  const canvas = document.getElementById('shareCanvas');
-  canvas.width = W; canvas.height = H;
-  const ctx = canvas.getContext('2d');
-
-  // Background — cream paper
-  ctx.fillStyle = '#f4f0e8';
-  ctx.fillRect(0, 0, W, H);
-
-  // Grid lines
-  ctx.strokeStyle = '#d4cfc3';
-  ctx.lineWidth = 0.5;
-  for (let x=0; x<W; x+=40) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke(); }
-  for (let y=0; y<H; y+=40) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
-
-  // Top bar
-  ctx.fillStyle = '#0e0e0e';
-  ctx.fillRect(0, 0, W, 80);
-
-  // Logo
-  ctx.fillStyle = '#f4f0e8';
-  ctx.font = 'bold 22px Georgia, serif';
-  ctx.textAlign = 'left';
-  ctx.letterSpacing = '4px';
-  ctx.fillText('CARD', 40, 44);
-  ctx.fillStyle = '#c0392b';
-  ctx.fillText('BLUEPRINTS', 40+ctx.measureText('CARD ').width, 44);
-  ctx.fillStyle = 'rgba(244,240,232,0.45)';
-  ctx.font = '12px monospace';
-  ctx.textAlign = 'right';
-  ctx.fillText('cardblueprints.com', W-40, 44);
-  ctx.fillStyle = 'rgba(244,240,232,0.3)';
-  ctx.font = '10px monospace';
-  ctx.fillText('the math is the math', W-40, 62);
-
-  // Birth card + PRC — two big cards side by side
-  const cardW = 130, cardH = 182;
-  const cardY = 110;
-  drawCard(ctx, a.birth_card, 40, cardY, cardW, cardH);
-  drawCard(ctx, a.prc, 40+cardW+20, cardY, cardW, cardH);
-
-  // Labels under cards
-  ctx.fillStyle = '#7a7060';
-  ctx.font = '11px monospace';
-  ctx.textAlign = 'center';
-  ctx.fillText('BIRTH CARD', 40+cardW/2, cardY+cardH+18);
-  ctx.fillText('PRC', 40+cardW+20+cardW/2, cardY+cardH+18);
-
-  // Card title
-  if (a.description?.title) {
-    ctx.fillStyle = '#0e0e0e';
-    ctx.font = 'bold 28px Georgia, serif';
-    ctx.textAlign = 'left';
-    ctx.fillText(a.description.title, 350, cardY+50);
+  if (ov.mirror) {
+    items.push({ icon: '★', text: `Card Mirror: ${ov.mirror.type} — ${ov.mirror.card}. One person's identity card is the other's ruling mechanism.` });
   }
-  ctx.fillStyle = '#7a7060';
-  ctx.font = '11px monospace';
-  ctx.textAlign = 'left';
-  const coreText = (a.description?.core_identity||'').slice(0, 90) + '...';
-  wrapText(ctx, coreText, 350, cardY+75, W-390, 18);
-
-  // Divider
-  const divY = cardY + cardH + 40;
-  ctx.strokeStyle = '#d4cfc3';
-  ctx.lineWidth = 1;
-  ctx.beginPath(); ctx.moveTo(40, divY); ctx.lineTo(W-40, divY); ctx.stroke();
-
-  // Section: Active Period
-  ctx.fillStyle = '#7a7060';
-  ctx.font = '10px monospace';
-  ctx.textAlign = 'left';
-  ctx.fillText('ACTIVE PERIOD', 40, divY+28);
-
-  ctx.fillStyle = '#0e0e0e';
-  ctx.font = 'bold 20px Georgia, serif';
-  ctx.fillText(`${ap.planet}  ·  ${ap.bc_card}`, 40, divY+52);
-
-  ctx.fillStyle = '#7a7060';
-  ctx.font = '11px monospace';
-  ctx.fillText(ap.domain, 40, divY+70);
-
-  if (ap.interpretation_bc?.sweet_spot) {
-    ctx.fillStyle = '#0e0e0e';
-    ctx.font = '12px monospace';
-    wrapText(ctx, `"${ap.interpretation_bc.sweet_spot}"`, 40, divY+96, W-80, 20);
+  if (ov.shared_period_cards?.length) {
+    ov.shared_period_cards.forEach(c => {
+      items.push({ icon: '◆', text: `Shared period card: ${c} appears in both yearly spreads.` });
+    });
+  }
+  if (ov.karma_crossover?.length) {
+    ov.karma_crossover.forEach(k => {
+      items.push({ icon: '↔', text: `Karma crossover: ${k}` });
+    });
+  }
+  if (!items.length) {
+    items.push({ icon: '—', text: 'No direct card overlaps detected this year.' });
   }
 
-  // Divider 2
-  const div2Y = divY + 150;
-  ctx.strokeStyle = '#d4cfc3'; ctx.lineWidth = 1;
-  ctx.beginPath(); ctx.moveTo(40, div2Y); ctx.lineTo(W-40, div2Y); ctx.stroke();
-
-  // Section: Planetary Periods — 7 planets in two columns
-  ctx.fillStyle = '#7a7060';
-  ctx.font = '10px monospace';
-  ctx.fillText('PLANETARY PERIODS', 40, div2Y+28);
-
-  const planets = ['Mercury','Venus','Mars','Jupiter','Saturn','Uranus','Neptune'];
-  const colW = (W-80)/2;
-  planets.forEach((p, i) => {
-    const col = i < 4 ? 0 : 1;
-    const row = i < 4 ? i : i-4;
-    const px = 40 + col*colW;
-    const py = div2Y + 50 + row*34;
-    const card = bc.periods[p];
-    const isActive = p === ap.planet;
-
-    if (isActive) {
-      ctx.fillStyle = '#0e0e0e';
-      roundRect(ctx, px-4, py-14, colW-20, 26, 2);
-      ctx.fill();
-    }
-
-    ctx.fillStyle = isActive ? 'rgba(244,240,232,0.55)' : '#7a7060';
-    ctx.font = '11px monospace';
-    ctx.textAlign = 'left';
-    ctx.fillText(p.toUpperCase(), px, py);
-
-    ctx.fillStyle = isActive ? '#ffffff' : (isRed(card) ? '#c0392b' : '#0e0e0e');
-    ctx.font = `bold 14px Georgia, serif`;
-    ctx.textAlign = 'right';
-    ctx.fillText(card||'—', px+colW-30, py);
-
-    if (isActive) {
-      ctx.fillStyle = '#c0392b';
-      ctx.font = '9px monospace';
-      ctx.fillText('NOW', px+colW-8, py);
-    }
-  });
-
-  // Divider 3
-  const div3Y = div2Y + 200;
-  ctx.strokeStyle = '#d4cfc3'; ctx.lineWidth = 1;
-  ctx.beginPath(); ctx.moveTo(40, div3Y); ctx.lineTo(W-40, div3Y); ctx.stroke();
-
-  // Atmosphere
-  ctx.fillStyle = '#7a7060';
-  ctx.font = '10px monospace';
-  ctx.textAlign = 'left';
-  ctx.fillText('YEARLY ATMOSPHERE', 40, div3Y+28);
-
-  ctx.fillStyle = '#0e0e0e';
-  ctx.font = '12px monospace';
-  ctx.fillText('Environment:', 40, div3Y+54);
-  ctx.fillStyle = isRed(karma?.environment) ? '#c0392b' : '#0e0e0e';
-  ctx.font = 'bold 20px Georgia, serif';
-  ctx.fillText(karma?.environment||'—', 160, div3Y+54);
-
-  ctx.fillStyle = '#0e0e0e';
-  ctx.font = '12px monospace';
-  ctx.fillText('Displacement:', 40, div3Y+82);
-  ctx.fillStyle = isRed(karma?.displacement) ? '#c0392b' : '#0e0e0e';
-  ctx.font = 'bold 20px Georgia, serif';
-  ctx.fillText(karma?.displacement||'—', 160, div3Y+82);
-
-  // Bottom bar
-  ctx.fillStyle = '#0e0e0e';
-  ctx.fillRect(0, H-60, W, 60);
-  ctx.fillStyle = 'rgba(244,240,232,0.4)';
-  ctx.font = '11px monospace';
-  ctx.textAlign = 'center';
-  ctx.fillText('cardblueprints.com  ·  run your numbers', W/2, H-24);
-
-  // Convert to blob and share/download
-  canvas.toBlob(async (blob) => {
-    const file = new File([blob], 'blueprint.png', {type:'image/png'});
-    if (navigator.share && navigator.canShare({files:[file]})) {
-      try {
-        await navigator.share({
-          files: [file],
-          title: `My Card Blueprint — ${a.birth_card}`,
-          text: `Birth Card: ${a.birth_card} · Active Period: ${ap.planet} · cardblueprints.com`
-        });
-        status.textContent = 'Shared!';
-      } catch(e) {
-        if (e.name !== 'AbortError') downloadCanvas(canvas);
-      }
-    } else {
-      downloadCanvas(canvas);
-    }
-    btn.disabled = false;
-    setTimeout(() => status.textContent = '', 3000);
-  }, 'image/png');
+  document.getElementById('overlayItems').innerHTML = items.map(i =>
+    `<div class="overlay-item">
+      <span class="overlay-icon">${i.icon}</span>
+      <span>${i.text}</span>
+    </div>`
+  ).join('');
 }
-
-function downloadCanvas(canvas) {
-  const link = document.createElement('a');
-  link.download = 'card-blueprint.png';
-  link.href = canvas.toDataURL('image/png');
-  link.click();
-  document.getElementById('shareStatus').textContent = 'Downloaded!';
-}
-
-function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
-  const words = text.split(' ');
-  let line = '';
-  let currentY = y;
-  for (const word of words) {
-    const test = line + word + ' ';
-    if (ctx.measureText(test).width > maxWidth && line !== '') {
-      ctx.fillText(line, x, currentY);
-      line = word + ' ';
-      currentY += lineHeight;
-    } else {
-      line = test;
-    }
-  }
-  ctx.fillText(line, x, currentY);
-}
-// ────────────────────────────────────────────────────────────────────────────
 </script>
 </body>
 </html>
