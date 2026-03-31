@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard — Card Blueprints</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0e0e0e;
+    --paper: #f4f0e8;
+    --white: #ffffff;
+    --card-red: #c0392b;
+    --accent: #c0392b;
+    --muted: #7a7060;
+    --border: #d4cfc3;
+    --panel: #ffffff;
+    --active-bg: #0e0e0e;
+    --active-fg: #f4f0e8;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'DM Mono', monospace;
+    min-height: 100vh;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 40px 40px;
+    opacity: 0.3;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* --- LAYOUT --- */
+  .app {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    min-height: 100vh;
+  }
+  @media (max-width: 768px) {
+    .app { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+  }
+
+  /* --- SIDEBAR --- */
+  .sidebar {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 32px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+  }
+  .sidebar-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .sidebar-logo span { color: var(--accent); }
+
+  .sidebar-nav { display: flex; flex-direction: column; gap: 4px; }
+  .nav-item {
+    padding: 10px 14px;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: background 0.15s;
+    color: rgba(244,240,232,0.6);
+  }
+  .nav-item:hover { background: rgba(255,255,255,0.08); color: var(--paper); }
+  .nav-item.active { background: var(--accent); color: white; }
+
+  .sidebar-profiles { flex: 1; }
+  .sidebar-section-label {
+    font-size: 0.6rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(244,240,232,0.4);
+    margin-bottom: 12px;
+  }
+  .profile-list { display: flex; flex-direction: column; gap: 4px; }
+  .profile-item {
+    padding: 8px 14px;
+    font-size: 0.68rem;
+    color: rgba(244,240,232,0.7);
+    cursor: pointer;
+    border-radius: 2px;
+    transition: background 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .profile-item:hover { background: rgba(255,255,255,0.08); }
+  .profile-pip {
+    width: 20px;
+    height: 20px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.6rem;
+  }
+
+  .sidebar-footer {
+    font-size: 0.6rem;
+    color: rgba(244,240,232,0.3);
+    letter-spacing: 0.08em;
+  }
+
+  /* --- MAIN --- */
+  main {
+    padding: 40px 48px;
+    max-width: 900px;
+  }
+  @media (max-width: 900px) { main { padding: 32px 24px; } }
+
+  .page-header {
+    margin-bottom: 40px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+  }
+  .page-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem;
+    font-weight: 900;
+  }
+  .page-meta { font-size: 0.65rem; color: var(--muted); letter-spacing: 0.1em; text-align: right; line-height: 1.8; }
+
+  /* --- TABS --- */
+  .tabs {
+    display: flex;
+    gap: 0;
+    margin-bottom: 36px;
+    border-bottom: 1px solid var(--border);
+  }
+  .tab {
+    padding: 12px 20px;
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    color: var(--muted);
+    transition: all 0.15s;
+  }
+  .tab:hover { color: var(--ink); }
+  .tab.active { color: var(--ink); border-bottom-color: var(--ink); }
+
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* --- BIRTHDAY INPUT --- */
+  .input-row {
+    display: flex;
+    gap: 12px;
+    align-items: flex-end;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+  }
+  .input-group { display: flex; flex-direction: column; gap: 6px; }
+  .input-group label {
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .input-group input {
+    width: 80px;
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    background: var(--white);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .input-group input:focus { border-color: var(--ink); }
+  .input-group input.wide { width: 100px; }
+
+  .btn {
+    padding: 11px 28px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    cursor: pointer;
+    border: none;
+    transition: all 0.15s;
+  }
+  .btn-primary { background: var(--ink); color: var(--paper); }
+  .btn-primary:hover { background: var(--accent); }
+  .btn-sm { padding: 8px 16px; font-size: 0.65rem; }
+
+  /* --- RESULT PANELS --- */
+  .result-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  @media (max-width: 640px) { .result-grid { grid-template-columns: 1fr; } }
+
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    padding: 24px;
+  }
+  .panel-label {
+    font-size: 0.58rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .panel-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  /* --- ARCHETYPE CARD --- */
+  .archetype-display {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+  .big-card {
+    width: 64px;
+    height: 90px;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    box-shadow: 2px 3px 0 var(--ink);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 8px;
+    flex-shrink: 0;
+    font-family: 'Playfair Display', serif;
+  }
+  .big-card.red { color: var(--card-red); }
+  .big-card .c-corner { font-size: 0.8rem; font-weight: 700; line-height: 1; }
+  .big-card .c-corner.flip { transform: rotate(180deg); align-self: flex-end; }
+  .big-card .c-suit { font-size: 1.6rem; text-align: center; }
+  .archetype-info {}
+  .archetype-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .archetype-sub { font-size: 0.68rem; color: var(--muted); line-height: 1.6; }
+
+  /* --- PERIODS TABLE --- */
+  .periods-table { width: 100%; border-collapse: collapse; }
+  .periods-table tr { border-bottom: 1px solid var(--border); }
+  .periods-table tr:last-child { border-bottom: none; }
+  .periods-table td {
+    padding: 9px 0;
+    font-size: 0.72rem;
+  }
+  .periods-table td:first-child { color: var(--muted); width: 90px; }
+  .periods-table td:last-child { text-align: right; font-weight: 500; }
+  .active-row td { color: var(--ink) !important; }
+  .active-row td:first-child {
+    color: var(--accent) !important;
+    font-weight: 500;
+  }
+  .active-badge {
+    display: inline-block;
+    background: var(--accent);
+    color: white;
+    font-size: 0.55rem;
+    letter-spacing: 0.1em;
+    padding: 2px 6px;
+    margin-left: 8px;
+    text-transform: uppercase;
+  }
+
+  /* --- ACTIVE PERIOD DETAIL --- */
+  .period-detail {
+    margin-top: 16px;
+    padding: 20px;
+    background: var(--ink);
+    color: var(--paper);
+  }
+  .period-detail-header {
+    font-size: 0.6rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(244,240,232,0.5);
+    margin-bottom: 12px;
+  }
+  .period-planet {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .period-domain { font-size: 0.68rem; color: rgba(244,240,232,0.6); margin-bottom: 20px; }
+  .lens-block { margin-bottom: 14px; }
+  .lens-label {
+    font-size: 0.58rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 4px;
+  }
+  .lens-text { font-size: 0.72rem; line-height: 1.6; color: rgba(244,240,232,0.85); }
+
+  /* --- ATMOSPHERE --- */
+  .atm-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .atm-item { }
+  .atm-label { font-size: 0.58rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+  .atm-card {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+  }
+  .atm-card.red { color: var(--card-red); }
+
+  /* --- COMPATIBILITY --- */
+  .compat-split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  @media (max-width: 640px) { .compat-split { grid-template-columns: 1fr; } }
+
+  .compat-panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    padding: 20px;
+  }
+  .compat-panel-label { font-size: 0.6rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
+  .compat-bc { font-family: 'Playfair Display', serif; font-size: 1.3rem; font-weight: 700; margin-bottom: 2px; }
+  .compat-bc.red { color: var(--card-red); }
+  .compat-sub { font-size: 0.68rem; color: var(--muted); }
+
+  .overlay-panel {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 24px;
+    margin-bottom: 20px;
+  }
+  .overlay-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 16px;
+  }
+  .overlay-item {
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(244,240,232,0.1);
+    font-size: 0.72rem;
+    color: rgba(244,240,232,0.8);
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .overlay-item:last-child { border-bottom: none; }
+  .overlay-icon { color: var(--accent); flex-shrink: 0; margin-top: 2px; }
+  .overlay-empty { font-size: 0.72rem; color: rgba(244,240,232,0.4); font-style: italic; }
+
+  /* --- LOADING --- */
+  .loading {
+    display: none;
+    padding: 40px;
+    text-align: center;
+    font-size: 0.7rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+  }
+  .loading.show { display: block; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  .loading span { animation: pulse 1.2s ease infinite; }
+
+  /* --- MISC --- */
+  .hidden { display: none !important; }
+  .divider { height: 1px; background: var(--border); margin: 24px 0; }
+  .tag {
+    display: inline-block;
+    padding: 3px 8px;
+    font-size: 0.58rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    background: var(--paper);
+    border: 1px solid var(--border);
+    color: var(--muted);
+  }
+  .tag.green { background: #e8f5e9; border-color: #a5d6a7; color: #2e7d32; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .animate-in { animation: fadeUp 0.35s ease both; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">Card <span>Blueprints</span></div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-item active" onclick="showTab('blueprint')">Blueprint</div>
+      <div class="nav-item" onclick="showTab('compatibility')">Compatibility</div>
+      {% if tier == 'practitioner' %}
+      <div class="nav-item" onclick="showTab('profiles')">Profiles</div>
+      {% endif %}
+    </nav>
+
+    <div class="sidebar-profiles">
+      <div class="sidebar-section-label">Saved Profiles</div>
+      <div class="profile-list" id="profileList">
+        <div class="profile-item" style="color:rgba(244,240,232,0.3);font-style:italic">
+          No profiles yet
+        </div>
+      </div>
+    </div>
+
+    <div class="sidebar-footer">
+      {{ email }}<br>
+      <span class="tag">{{ tier }}</span>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main>
+    <div class="page-header">
+      <h1 class="page-title">Dashboard</h1>
+      <div class="page-meta">
+        Today: <strong id="todayDate"></strong><br>
+        <span id="tierBadge" class="tag green">{{ tier }}</span>
+      </div>
+    </div>
+
+    <!-- TABS -->
+    <div class="tabs">
+      <div class="tab active" id="tab-blueprint" onclick="showTab('blueprint')">Blueprint</div>
+      <div class="tab" id="tab-compatibility" onclick="showTab('compatibility')">Compatibility</div>
+      {% if tier == 'practitioner' %}<div class="tab" id="tab-profiles" onclick="showTab('profiles')">Profiles</div>{% endif %}
+    </div>
+
+    <!-- ======================== BLUEPRINT TAB ======================== -->
+    <div class="tab-panel active" id="panel-blueprint">
+
+      <div class="input-row">
+        <div class="input-group">
+          <label>Month</label>
+          <input type="number" id="bp-month" min="1" max="12" placeholder="MM" class="wide">
+        </div>
+        <div class="input-group">
+          <label>Day</label>
+          <input type="number" id="bp-day" min="1" max="31" placeholder="DD" class="wide">
+        </div>
+        <div class="input-group">
+          <label>Year</label>
+          <input type="number" id="bp-year" min="1900" max="2010" placeholder="YYYY" style="width:110px">
+        </div>
+        <button class="btn btn-primary" onclick="runBlueprint()">Calculate</button>
+      </div>
+
+      <div class="loading" id="bp-loading"><span>Calculating blueprint...</span></div>
+
+      <div id="bp-results" class="hidden">
+
+        <!-- Archetype row -->
+        <div class="result-grid animate-in">
+          <div class="panel">
+            <div class="panel-label">Birth Card</div>
+            <div class="archetype-display">
+              <div class="big-card" id="bc-card-visual">
+                <div class="c-corner" id="bc-corner-top"></div>
+                <div class="c-suit" id="bc-suit-center"></div>
+                <div class="c-corner flip" id="bc-corner-bot"></div>
+              </div>
+              <div class="archetype-info">
+                <div class="archetype-title" id="bc-title"></div>
+                <div class="archetype-sub" id="bc-core"></div>
+              </div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-label">Planetary Ruling Card</div>
+            <div class="archetype-display">
+              <div class="big-card" id="prc-card-visual">
+                <div class="c-corner" id="prc-corner-top"></div>
+                <div class="c-suit" id="prc-suit-center"></div>
+                <div class="c-corner flip" id="prc-corner-bot"></div>
+              </div>
+              <div class="archetype-info">
+                <div class="archetype-title" id="prc-card-label"></div>
+                <div class="archetype-sub" id="prc-core"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Periods + Active Detail -->
+        <div class="result-grid animate-in" style="animation-delay:0.1s">
+          <div class="panel">
+            <div class="panel-label">Planetary Periods</div>
+            <table class="periods-table" id="periodsTable"></table>
+            <div class="divider"></div>
+            <div style="display:flex;justify-content:space-between;font-size:0.68rem;color:var(--muted)">
+              <span>Pluto: <strong id="plutoCard" style="color:var(--ink)"></strong></span>
+              <span>Result: <strong id="resultCard" style="color:var(--ink)"></strong></span>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-label">Active Period</div>
+            <div class="period-detail" id="activePeriodDetail"></div>
+          </div>
+        </div>
+
+        <!-- Atmosphere + Long Range -->
+        <div class="result-grid animate-in" style="animation-delay:0.2s">
+          <div class="panel">
+            <div class="panel-label">Yearly Atmosphere</div>
+            <div class="atm-grid">
+              <div class="atm-item">
+                <div class="atm-label">Environment (Support)</div>
+                <div class="atm-card" id="atmEnv"></div>
+              </div>
+              <div class="atm-item">
+                <div class="atm-label">Displacement (Tax)</div>
+                <div class="atm-card" id="atmDisp"></div>
+              </div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-label">Long Range Theme</div>
+            <div class="atm-grid">
+              <div class="atm-item">
+                <div class="atm-label">Theme Card</div>
+                <div class="atm-card" id="lrCard"></div>
+              </div>
+              <div class="atm-item">
+                <div class="atm-label">Planet</div>
+                <div class="atm-card" id="lrPlanet" style="font-size:0.9rem;font-family:'DM Mono',monospace"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ======================== COMPATIBILITY TAB ======================== -->
+    <div class="tab-panel" id="panel-compatibility">
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:16px">
+        <div>
+          <div style="font-size:0.6rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);margin-bottom:12px">Person 1</div>
+          <div class="input-row" style="margin-bottom:0;flex-wrap:wrap">
+            <div class="input-group"><label>Mo</label><input type="number" id="c1-month" min="1" max="12" placeholder="MM"></div>
+            <div class="input-group"><label>Day</label><input type="number" id="c1-day" min="1" max="31" placeholder="DD"></div>
+            <div class="input-group"><label>Year</label><input type="number" id="c1-year" min="1900" max="2010" placeholder="YYYY" style="width:100px"></div>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:0.6rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);margin-bottom:12px">Person 2</div>
+          <div class="input-row" style="margin-bottom:0;flex-wrap:wrap">
+            <div class="input-group"><label>Mo</label><input type="number" id="c2-month" min="1" max="12" placeholder="MM"></div>
+            <div class="input-group"><label>Day</label><input type="number" id="c2-day" min="1" max="31" placeholder="DD"></div>
+            <div class="input-group"><label>Year</label><input type="number" id="c2-year" min="1900" max="2010" placeholder="YYYY" style="width:100px"></div>
+          </div>
+        </div>
+      </div>
+      <button class="btn btn-primary" onclick="runCompatibility()" style="margin-bottom:32px">Run Compatibility</button>
+
+      <div class="loading" id="compat-loading"><span>Running overlay...</span></div>
+
+      <div id="compat-results" class="hidden">
+
+        <div class="compat-split animate-in">
+          <div class="compat-panel">
+            <div class="compat-panel-label">Person 1</div>
+            <div class="compat-bc" id="c1-bc"></div>
+            <div class="compat-sub" id="c1-sub"></div>
+            <div class="divider"></div>
+            <div style="font-size:0.68rem;color:var(--muted)">Active: <strong id="c1-active" style="color:var(--ink)"></strong></div>
+          </div>
+          <div class="compat-panel">
+            <div class="compat-panel-label">Person 2</div>
+            <div class="compat-bc" id="c2-bc"></div>
+            <div class="compat-sub" id="c2-sub"></div>
+            <div class="divider"></div>
+            <div style="font-size:0.68rem;color:var(--muted)">Active: <strong id="c2-active" style="color:var(--ink)"></strong></div>
+          </div>
+        </div>
+
+        <div class="overlay-panel animate-in" style="animation-delay:0.1s">
+          <div class="overlay-title">Compatibility Overlay</div>
+          <div id="overlayItems"></div>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+const TODAY = new Date();
+document.getElementById('todayDate').textContent = TODAY.toLocaleDateString('en-US', {month:'long',day:'numeric',year:'numeric'});
+
+function isRed(card) {
+  return card && (card.includes('♥') || card.includes('♦'));
+}
+
+function cardParts(card) {
+  if (!card) return { rank: '?', suit: '?' };
+  const suits = { '♥':'♥','♦':'♦','♣':'♣','♠':'♠' };
+  let suit = '';
+  for (const s of Object.keys(suits)) {
+    if (card.includes(s)) { suit = s; break; }
+  }
+  const rank = card.replace(suit,'').trim();
+  return { rank, suit };
+}
+
+function renderCard(el, card) {
+  const { rank, suit } = cardParts(card);
+  const topEl = el.querySelector('.c-corner');
+  const botEl = el.querySelector('.c-corner.flip');
+  const suitEl = el.querySelector('.c-suit');
+  if (topEl) topEl.textContent = rank + '\n' + suit;
+  if (botEl) botEl.textContent = rank + '\n' + suit;
+  if (suitEl) suitEl.textContent = suit;
+  el.className = 'big-card' + (isRed(card) ? ' red' : '');
+}
+
+function showTab(name) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('panel-' + name)?.classList.add('active');
+  document.getElementById('tab-' + name)?.classList.add('active');
+  // also handle sidebar
+  document.querySelectorAll('.nav-item').forEach(n => {
+    n.classList.toggle('active', n.textContent.toLowerCase().includes(name));
+  });
+}
+
+async function runBlueprint() {
+  const month = document.getElementById('bp-month').value;
+  const day = document.getElementById('bp-day').value;
+  const year = document.getElementById('bp-year').value;
+  if (!month || !day || !year) return;
+
+  document.getElementById('bp-loading').classList.add('show');
+  document.getElementById('bp-results').classList.add('hidden');
+
+  const res = await fetch('/calculate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ month: +month, day: +day, year: +year })
+  });
+  const data = await res.json();
+
+  document.getElementById('bp-loading').classList.remove('show');
+  if (data.error) { alert(data.error); return; }
+
+  renderBlueprint(data);
+  document.getElementById('bp-results').classList.remove('hidden');
+}
+
+function renderBlueprint(data) {
+  const a = data.archetype;
+  const bc = data.birth_card_spread;
+  const ap = data.active_period;
+  const karma = data.karma?.bc_yearly;
+  const lr = data.long_range?.bc;
+
+  // Birth card
+  renderCard(document.getElementById('bc-card-visual'), a.birth_card);
+  document.getElementById('bc-title').textContent = a.description?.title || a.birth_card;
+  document.getElementById('bc-core').textContent = (a.description?.core_identity || '').slice(0, 120) + '...';
+
+  // PRC
+  renderCard(document.getElementById('prc-card-visual'), a.prc);
+  document.getElementById('prc-card-label').textContent = a.prc;
+  document.getElementById('prc-core').textContent = (a.prc_description?.core_identity || '').slice(0, 120) + '...';
+
+  // Periods table
+  const planets = ['Mercury','Venus','Mars','Jupiter','Saturn','Uranus','Neptune'];
+  const table = document.getElementById('periodsTable');
+  table.innerHTML = planets.map(p => {
+    const card = bc.periods[p] || '—';
+    const isActive = p === ap.planet;
+    return `<tr class="${isActive ? 'active-row' : ''}">
+      <td>${p}${isActive ? '<span class="active-badge">now</span>' : ''}</td>
+      <td style="color:${isRed(card)?'var(--card-red)':'var(--ink)'}">${card}</td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('plutoCard').textContent = bc.pluto || '—';
+  document.getElementById('resultCard').textContent = bc.result || '—';
+
+  // Active period detail
+  const ib = ap.interpretation_bc;
+  document.getElementById('activePeriodDetail').innerHTML = `
+    <div class="period-detail-header">Active Now</div>
+    <div class="period-planet">${ap.planet} · ${ap.bc_card}</div>
+    <div class="period-domain">${ap.domain}</div>
+    ${ib ? `
+      <div class="lens-block"><div class="lens-label">Under</div><div class="lens-text">${ib.under}</div></div>
+      <div class="lens-block"><div class="lens-label">Sweet Spot</div><div class="lens-text">${ib.sweet_spot}</div></div>
+      <div class="lens-block"><div class="lens-label">Over</div><div class="lens-text">${ib.over}</div></div>
+    ` : '<div class="lens-text" style="opacity:0.5">No interpretation data</div>'}
+  `;
+
+  // Atmosphere
+  const envCard = karma?.environment || '—';
+  const dispCard = karma?.displacement || '—';
+  document.getElementById('atmEnv').textContent = envCard;
+  document.getElementById('atmEnv').className = 'atm-card' + (isRed(envCard) ? ' red' : '');
+  document.getElementById('atmDisp').textContent = dispCard;
+  document.getElementById('atmDisp').className = 'atm-card' + (isRed(dispCard) ? ' red' : '');
+
+  // Long range
+  document.getElementById('lrCard').textContent = lr?.card || '—';
+  document.getElementById('lrCard').className = 'atm-card' + (isRed(lr?.card) ? ' red' : '');
+  document.getElementById('lrPlanet').textContent = lr?.planet || '—';
+}
+
+async function runCompatibility() {
+  const fields = ['c1-month','c1-day','c1-year','c2-month','c2-day','c2-year'];
+  const vals = fields.map(f => document.getElementById(f).value);
+  if (vals.some(v => !v)) return;
+
+  document.getElementById('compat-loading').classList.add('show');
+  document.getElementById('compat-results').classList.add('hidden');
+
+  const res = await fetch('/compatibility', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      p1_month: +vals[0], p1_day: +vals[1], p1_year: +vals[2],
+      p2_month: +vals[3], p2_day: +vals[4], p2_year: +vals[5],
+    })
+  });
+  const data = await res.json();
+
+  document.getElementById('compat-loading').classList.remove('show');
+  if (data.error) { alert(data.error); return; }
+
+  renderCompatibility(data);
+  document.getElementById('compat-results').classList.remove('hidden');
+}
+
+function renderCompatibility(data) {
+  const p1 = data.person1;
+  const p2 = data.person2;
+  const ov = data.overlay;
+
+  // Person panels
+  const p1bc = p1.archetype.birth_card;
+  const p2bc = p2.archetype.birth_card;
+  document.getElementById('c1-bc').textContent = `${p1bc} · ${p1.archetype.prc}`;
+  document.getElementById('c1-bc').className = 'compat-bc' + (isRed(p1bc) ? ' red' : '');
+  document.getElementById('c1-sub').textContent = p1.archetype.description?.title || '';
+  document.getElementById('c1-active').textContent = `${ov.p1_active.planet} — ${ov.p1_active.bc_card}`;
+
+  document.getElementById('c2-bc').textContent = `${p2bc} · ${p2.archetype.prc}`;
+  document.getElementById('c2-bc').className = 'compat-bc' + (isRed(p2bc) ? ' red' : '');
+  document.getElementById('c2-sub').textContent = p2.archetype.description?.title || '';
+  document.getElementById('c2-active').textContent = `${ov.p2_active.planet} — ${ov.p2_active.bc_card}`;
+
+  // Overlay items
+  const items = [];
+
+  if (ov.mirror) {
+    items.push({ icon: '★', text: `Card Mirror: ${ov.mirror.type} — ${ov.mirror.card}. One person's identity card is the other's ruling mechanism.` });
+  }
+  if (ov.shared_period_cards?.length) {
+    ov.shared_period_cards.forEach(c => {
+      items.push({ icon: '◆', text: `Shared period card: ${c} appears in both yearly spreads.` });
+    });
+  }
+  if (ov.karma_crossover?.length) {
+    ov.karma_crossover.forEach(k => {
+      items.push({ icon: '↔', text: `Karma crossover: ${k}` });
+    });
+  }
+  if (!items.length) {
+    items.push({ icon: '—', text: 'No direct card overlaps detected this year.' });
+  }
+
+  document.getElementById('overlayItems').innerHTML = items.map(i =>
+    `<div class="overlay-item">
+      <span class="overlay-icon">${i.icon}</span>
+      <span>${i.text}</span>
+    </div>`
+  ).join('');
+}
+</script>
+</body>
+</html>

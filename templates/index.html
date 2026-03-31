@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Card Blueprints</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0e0e0e;
+    --paper: #f4f0e8;
+    --card-red: #c0392b;
+    --card-black: #1a1a1a;
+    --accent: #c0392b;
+    --muted: #7a7060;
+    --border: #d4cfc3;
+    --suit-h: "♥";
+    --suit-d: "♦";
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'DM Mono', monospace;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* --- GRID BACKGROUND --- */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 40px 40px;
+    opacity: 0.4;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  /* --- NAV --- */
+  nav {
+    padding: 28px 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+  }
+  .logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .logo span { color: var(--accent); }
+  nav small {
+    font-size: 0.65rem;
+    color: var(--muted);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  /* --- HERO --- */
+  .hero {
+    padding: 80px 0 60px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+    align-items: center;
+  }
+  @media (max-width: 680px) {
+    .hero { grid-template-columns: 1fr; gap: 40px; }
+    .hero-card-visual { display: none; }
+  }
+
+  .eyebrow {
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 20px;
+  }
+  h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.4rem, 5vw, 3.8rem);
+    font-weight: 900;
+    line-height: 1.05;
+    margin-bottom: 24px;
+  }
+  h1 em {
+    font-style: italic;
+    color: var(--accent);
+  }
+  .hero-sub {
+    font-size: 0.8rem;
+    line-height: 1.8;
+    color: var(--muted);
+    margin-bottom: 40px;
+    max-width: 420px;
+  }
+
+  /* --- CARD VISUAL --- */
+  .hero-card-visual {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+  }
+  .playing-card {
+    width: 160px;
+    height: 224px;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: 4px 6px 0 var(--ink);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 14px;
+    position: relative;
+    font-family: 'Playfair Display', serif;
+  }
+  .playing-card.red { color: var(--card-red); }
+  .playing-card .corner { font-size: 1.1rem; font-weight: 700; line-height: 1; }
+  .playing-card .corner.bottom { transform: rotate(180deg); align-self: flex-end; }
+  .playing-card .center-pip { font-size: 3.5rem; text-align: center; line-height: 1; margin: auto; }
+
+  .card-stack {
+    position: relative;
+    width: 200px;
+    height: 240px;
+  }
+  .card-stack .playing-card {
+    position: absolute;
+    transition: transform 0.3s ease;
+  }
+  .card-stack .playing-card:nth-child(1) { transform: rotate(-8deg) translateX(-20px); }
+  .card-stack .playing-card:nth-child(2) { transform: rotate(3deg); z-index: 2; }
+  .card-stack .playing-card:nth-child(3) { transform: rotate(12deg) translateX(20px); z-index: 1; }
+  .card-stack:hover .playing-card:nth-child(1) { transform: rotate(-14deg) translateX(-30px); }
+  .card-stack:hover .playing-card:nth-child(3) { transform: rotate(18deg) translateX(30px); }
+
+  /* --- PRICING --- */
+  .pricing {
+    padding: 60px 0 80px;
+  }
+  .section-label {
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 40px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .pricing-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+  @media (max-width: 580px) { .pricing-grid { grid-template-columns: 1fr; } }
+
+  .plan {
+    background: white;
+    border: 1px solid var(--border);
+    padding: 36px 32px;
+    position: relative;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  .plan:hover {
+    transform: translateY(-3px);
+    box-shadow: 4px 6px 0 var(--ink);
+  }
+  .plan.featured {
+    border-color: var(--ink);
+    box-shadow: 4px 6px 0 var(--ink);
+  }
+  .plan-badge {
+    position: absolute;
+    top: -12px;
+    left: 24px;
+    background: var(--ink);
+    color: var(--paper);
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+  }
+  .plan-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .plan-desc {
+    font-size: 0.7rem;
+    color: var(--muted);
+    margin-bottom: 24px;
+    line-height: 1.6;
+  }
+  .plan-price {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.8rem;
+    font-weight: 900;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .plan-price sup { font-size: 1.2rem; vertical-align: super; }
+  .plan-price sub { font-size: 0.9rem; color: var(--muted); font-family: 'DM Mono', monospace; font-weight: 300; }
+  .plan-features {
+    margin: 24px 0 28px;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .plan-features li {
+    font-size: 0.72rem;
+    color: var(--muted);
+    padding-left: 16px;
+    position: relative;
+    line-height: 1.5;
+  }
+  .plan-features li::before {
+    content: '—';
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+  }
+
+  .btn {
+    display: inline-block;
+    padding: 14px 28px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    text-decoration: none;
+    cursor: pointer;
+    border: none;
+    transition: all 0.15s ease;
+    width: 100%;
+    text-align: center;
+  }
+  .btn-primary {
+    background: var(--ink);
+    color: var(--paper);
+  }
+  .btn-primary:hover { background: var(--accent); }
+  .btn-outline {
+    background: transparent;
+    color: var(--ink);
+    border: 1px solid var(--ink);
+  }
+  .btn-outline:hover { background: var(--ink); color: var(--paper); }
+
+  /* --- WHAT YOU GET --- */
+  .features {
+    padding: 20px 0 80px;
+    border-top: 1px solid var(--border);
+  }
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+    margin-top: 40px;
+  }
+  @media (max-width: 680px) { .features-grid { grid-template-columns: 1fr; } }
+
+  .feature-item {}
+  .feature-num {
+    font-size: 0.65rem;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+    margin-bottom: 12px;
+  }
+  .feature-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .feature-text {
+    font-size: 0.72rem;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+
+  /* --- FOOTER --- */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 28px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  footer small { font-size: 0.65rem; color: var(--muted); letter-spacing: 0.08em; }
+
+  /* --- ANIMATIONS --- */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .hero-text { animation: fadeUp 0.6s ease both; }
+  .hero-card-visual { animation: fadeUp 0.6s ease 0.2s both; }
+  .pricing { animation: fadeUp 0.6s ease 0.1s both; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <nav>
+    <a class="logo" href="/">Card <span>Blueprints</span></a>
+    <small>The math is the math</small>
+  </nav>
+
+  <section class="hero">
+    <div class="hero-text">
+      <p class="eyebrow">Deterministic · Pattern Recognition · No Mysticism</p>
+      <h1>Your birth date is a <em>formula.</em> Run the numbers.</h1>
+      <p class="hero-sub">Card Blueprints maps your planetary periods, yearly atmosphere, and compatibility overlay using a 52-card mathematical system. Not astrology. Not tarot. Structured pattern analysis.</p>
+      <a href="#pricing" class="btn btn-primary">Get Access</a>
+    </div>
+    <div class="hero-card-visual">
+      <div class="card-stack">
+        <div class="playing-card red">
+          <div class="corner">8<br>♦</div>
+          <div class="center-pip">♦</div>
+          <div class="corner bottom">8<br>♦</div>
+        </div>
+        <div class="playing-card">
+          <div class="corner">5<br>♣</div>
+          <div class="center-pip">♣</div>
+          <div class="corner bottom">5<br>♣</div>
+        </div>
+        <div class="playing-card red">
+          <div class="corner">K<br>♥</div>
+          <div class="center-pip">♥</div>
+          <div class="corner bottom">K<br>♥</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="features">
+    <p class="section-label">What you get</p>
+    <div class="features-grid">
+      <div class="feature-item">
+        <p class="feature-num">01</p>
+        <h3 class="feature-title">Full Yearly Blueprint</h3>
+        <p class="feature-text">Birth card, PRC, all 7 planetary period cards, Pluto card, Result card, long range theme. The complete spread for your current year.</p>
+      </div>
+      <div class="feature-item">
+        <p class="feature-num">02</p>
+        <h3 class="feature-title">Active Period Tracker</h3>
+        <p class="feature-text">Know exactly which planetary period you're in today, what card is active, and the three-lens interpretation: under, sweet spot, over.</p>
+      </div>
+      <div class="feature-item">
+        <p class="feature-num">03</p>
+        <h3 class="feature-title">Compatibility Overlay</h3>
+        <p class="feature-text">Run two birthdates against each other. Identifies card mirrors, shared period cards, and karma crossovers between two people.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="pricing" id="pricing">
+    <p class="section-label">Access tiers</p>
+    <div class="pricing-grid">
+
+      <div class="plan">
+        <div class="plan-name">Personal</div>
+        <div class="plan-desc">Your blueprint. One profile, all three tools.</div>
+        <div class="plan-price"><sup>$</sup>9<sub>/mo</sub></div>
+        <ul class="plan-features">
+          <li>Full yearly blueprint report</li>
+          <li>Active planetary period tracker</li>
+          <li>Compatibility checker (unlimited runs)</li>
+          <li>1 saved profile</li>
+        </ul>
+        <a href="/checkout/consumer" class="btn btn-outline">Start — $9/mo</a>
+      </div>
+
+      <div class="plan featured">
+        <div class="plan-badge">Practitioners</div>
+        <div class="plan-name">Professional</div>
+        <div class="plan-desc">Run blueprints for clients. Unlimited profiles, all tools.</div>
+        <div class="plan-price"><sup>$</sup>29<sub>/mo</sub></div>
+        <ul class="plan-features">
+          <li>Everything in Personal</li>
+          <li>Unlimited saved profiles</li>
+          <li>Multi-profile dashboard</li>
+          <li>Client comparison view</li>
+        </ul>
+        <a href="/checkout/practitioner" class="btn btn-primary">Start — $29/mo</a>
+      </div>
+
+    </div>
+  </section>
+
+  <footer>
+    <small>© 2026 Card Blueprints · cardblueprints.com</small>
+    <small>The math is the math.</small>
+  </footer>
+
+</div>
+</body>
+</html>
