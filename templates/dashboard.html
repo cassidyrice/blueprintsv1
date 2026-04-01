@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dashboard — Card Blueprints</title>
+<title>Dashboard — The Analog Algorithm</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
@@ -11,8 +11,8 @@
     --ink: #1c3f6e;
     --paper: #ede8dc;
     --white: #ffffff;
-    --red: #d42020;
-    --accent: #d42020;
+    --red: #b5231a;
+    --accent: #b5231a;
     --muted: #7a7060;
     --border: #d4cfc3;
     --panel: #ffffff;
@@ -235,7 +235,7 @@
   @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
   .animate-in { animation: fadeUp 0.3s ease both; }
   .tag { display: inline-block; padding: 2px 7px; font-size: 0.55rem; letter-spacing: 0.1em; text-transform: uppercase; background: var(--paper); border: 1px solid var(--border); color: var(--muted); }
-  .tag.green { background: #f4f0e8; border-color: #1a1a1a; color: #1a1a1a; }
+  .tag.green { background: #e8edf4; border-color: #1c3f6e; color: #1c3f6e; }
 </style>
 </head>
 <body>
@@ -248,7 +248,7 @@
 
 <div class="app">
   <aside class="sidebar">
-    <div class="sidebar-logo">Card <span>Blueprints</span></div>
+    <div class="sidebar-logo">The Analog <span>Algorithm</span></div>
     <nav class="sidebar-nav">
       <div class="nav-item active" onclick="showTab('blueprint')">Blueprint</div>
       <div class="nav-item" onclick="showTab('compatibility')">Compatibility</div>
@@ -654,7 +654,7 @@ function drawCard(ctx, card, x, y, w, h) {
   roundRect(ctx, x, y, w, h, 4);
   ctx.fill(); ctx.stroke();
   // shadow
-  ctx.strokeStyle = '#0e0e0e';
+  ctx.strokeStyle = '#1c3f6e';
   ctx.lineWidth = 1.5;
   roundRect(ctx, x+2, y+3, w, h, 4);
   ctx.stroke();
@@ -665,7 +665,7 @@ function drawCard(ctx, card, x, y, w, h) {
   roundRect(ctx, x, y, w, h, 4);
   ctx.fill(); ctx.stroke();
   // text
-  ctx.fillStyle = red ? '#c0392b' : '#0e0e0e';
+  ctx.fillStyle = red ? '#b5231a' : '#1c3f6e';
   ctx.font = `bold ${Math.floor(h*0.16)}px 'Georgia', serif`;
   ctx.textAlign = 'left';
   ctx.fillText(rank, x+5, y+h*0.22);
@@ -681,7 +681,7 @@ function drawCard(ctx, card, x, y, w, h) {
   ctx.rotate(Math.PI);
   ctx.font = `bold ${Math.floor(h*0.16)}px 'Georgia', serif`;
   ctx.textAlign = 'left';
-  ctx.fillStyle = red ? '#c0392b' : '#0e0e0e';
+  ctx.fillStyle = red ? '#b5231a' : '#1c3f6e';
   ctx.fillText(rank, 0, h*0.12);
   ctx.font = `${Math.floor(h*0.14)}px 'Georgia', serif`;
   ctx.fillText(suit, 0, h*0.24);
@@ -718,7 +718,7 @@ async function shareBlueprint() {
   const ctx = canvas.getContext('2d');
 
   // Background — cream paper
-  ctx.fillStyle = '#f4f0e8';
+  ctx.fillStyle = '#ede8dc';
   ctx.fillRect(0, 0, W, H);
 
   // Grid lines
@@ -728,21 +728,21 @@ async function shareBlueprint() {
   for (let y=0; y<H; y+=40) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
 
   // Top bar
-  ctx.fillStyle = '#0e0e0e';
+  ctx.fillStyle = '#1c3f6e';
   ctx.fillRect(0, 0, W, 80);
 
   // Logo
-  ctx.fillStyle = '#f4f0e8';
+  ctx.fillStyle = '#ede8dc';
   ctx.font = 'bold 22px Georgia, serif';
   ctx.textAlign = 'left';
   ctx.letterSpacing = '4px';
-  ctx.fillText('CARD', 40, 44);
-  ctx.fillStyle = '#c0392b';
-  ctx.fillText('BLUEPRINTS', 40+ctx.measureText('CARD ').width, 44);
+  ctx.fillText('THE ANALOG', 40, 44);
+  ctx.fillStyle = '#b5231a';
+  ctx.fillText('ALGORITHM', 40+ctx.measureText('THE ANALOG ').width, 44);
   ctx.fillStyle = 'rgba(244,240,232,0.45)';
   ctx.font = '12px monospace';
   ctx.textAlign = 'right';
-  ctx.fillText('cardblueprints.com', W-40, 44);
+  ctx.fillText('theanalogalgorithm.com', W-40, 44);
   ctx.fillStyle = 'rgba(244,240,232,0.3)';
   ctx.font = '10px monospace';
   ctx.fillText('the math is the math', W-40, 62);
@@ -762,7 +762,7 @@ async function shareBlueprint() {
 
   // Card title
   if (a.description?.title) {
-    ctx.fillStyle = '#0e0e0e';
+    ctx.fillStyle = '#1c3f6e';
     ctx.font = 'bold 28px Georgia, serif';
     ctx.textAlign = 'left';
     ctx.fillText(a.description.title, 350, cardY+50);
@@ -785,7 +785,7 @@ async function shareBlueprint() {
   ctx.textAlign = 'left';
   ctx.fillText('ACTIVE PERIOD', 40, divY+28);
 
-  ctx.fillStyle = '#0e0e0e';
+  ctx.fillStyle = '#1c3f6e';
   ctx.font = 'bold 20px Georgia, serif';
   ctx.fillText(`${ap.planet}  ·  ${ap.bc_card}`, 40, divY+52);
 
@@ -794,7 +794,7 @@ async function shareBlueprint() {
   ctx.fillText(ap.domain, 40, divY+70);
 
   if (ap.interpretation_bc?.sweet_spot) {
-    ctx.fillStyle = '#0e0e0e';
+    ctx.fillStyle = '#1c3f6e';
     ctx.font = '12px monospace';
     wrapText(ctx, `"${ap.interpretation_bc.sweet_spot}"`, 40, divY+96, W-80, 20);
   }
@@ -820,7 +820,7 @@ async function shareBlueprint() {
     const isActive = p === ap.planet;
 
     if (isActive) {
-      ctx.fillStyle = '#0e0e0e';
+      ctx.fillStyle = '#1c3f6e';
       roundRect(ctx, px-4, py-14, colW-20, 26, 2);
       ctx.fill();
     }
@@ -830,13 +830,13 @@ async function shareBlueprint() {
     ctx.textAlign = 'left';
     ctx.fillText(p.toUpperCase(), px, py);
 
-    ctx.fillStyle = isActive ? '#ffffff' : (isRed(card) ? '#c0392b' : '#0e0e0e');
+    ctx.fillStyle = isActive ? '#ffffff' : (isRed(card) ? '#b5231a' : '#1c3f6e');
     ctx.font = `bold 14px Georgia, serif`;
     ctx.textAlign = 'right';
     ctx.fillText(card||'—', px+colW-30, py);
 
     if (isActive) {
-      ctx.fillStyle = '#c0392b';
+      ctx.fillStyle = '#b5231a';
       ctx.font = '9px monospace';
       ctx.fillText('NOW', px+colW-8, py);
     }
@@ -853,27 +853,27 @@ async function shareBlueprint() {
   ctx.textAlign = 'left';
   ctx.fillText('YEARLY ATMOSPHERE', 40, div3Y+28);
 
-  ctx.fillStyle = '#0e0e0e';
+  ctx.fillStyle = '#1c3f6e';
   ctx.font = '12px monospace';
   ctx.fillText('Environment:', 40, div3Y+54);
-  ctx.fillStyle = isRed(karma?.environment) ? '#c0392b' : '#0e0e0e';
+  ctx.fillStyle = isRed(karma?.environment) ? '#b5231a' : '#1c3f6e';
   ctx.font = 'bold 20px Georgia, serif';
   ctx.fillText(karma?.environment||'—', 160, div3Y+54);
 
-  ctx.fillStyle = '#0e0e0e';
+  ctx.fillStyle = '#1c3f6e';
   ctx.font = '12px monospace';
   ctx.fillText('Displacement:', 40, div3Y+82);
-  ctx.fillStyle = isRed(karma?.displacement) ? '#c0392b' : '#0e0e0e';
+  ctx.fillStyle = isRed(karma?.displacement) ? '#b5231a' : '#1c3f6e';
   ctx.font = 'bold 20px Georgia, serif';
   ctx.fillText(karma?.displacement||'—', 160, div3Y+82);
 
   // Bottom bar
-  ctx.fillStyle = '#0e0e0e';
+  ctx.fillStyle = '#1c3f6e';
   ctx.fillRect(0, H-60, W, 60);
   ctx.fillStyle = 'rgba(244,240,232,0.4)';
   ctx.font = '11px monospace';
   ctx.textAlign = 'center';
-  ctx.fillText('cardblueprints.com  ·  run your numbers', W/2, H-24);
+  ctx.fillText('theanalogalgorithm.com  ·  the math is the math', W/2, H-24);
 
   // Convert to blob and share/download
   canvas.toBlob(async (blob) => {
@@ -882,8 +882,8 @@ async function shareBlueprint() {
       try {
         await navigator.share({
           files: [file],
-          title: `My Card Blueprint — ${a.birth_card}`,
-          text: `Birth Card: ${a.birth_card} · Active Period: ${ap.planet} · cardblueprints.com`
+          title: `My Analog Algorithm Blueprint — ${a.birth_card}`,
+          text: `Birth Card: ${a.birth_card} · Active Period: ${ap.planet} · theanalogalgorithm.com`
         });
         status.textContent = 'Shared!';
       } catch(e) {
@@ -899,7 +899,7 @@ async function shareBlueprint() {
 
 function downloadCanvas(canvas) {
   const link = document.createElement('a');
-  link.download = 'card-blueprint.png';
+  link.download = 'analog-algorithm-blueprint.png';
   link.href = canvas.toDataURL('image/png');
   link.click();
   document.getElementById('shareStatus').textContent = 'Downloaded!';
