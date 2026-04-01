@@ -448,17 +448,37 @@ def download_pdf():
     INK        = HexColor("#1a1a1a")
     MUTED      = HexColor("#7a7060")
     HEART_RED  = HexColor("#b5231a")
-    DIAMOND_GOLD = HexColor("#b5231a")
-    CLUB_INK   = HexColor("#1c3f6e")
-    SPADE_INK  = HexColor("#1a1a1a")
+    DIAMOND_RED = HexColor("#b5231a")
+    BLACK      = HexColor("#1a1a1a")
 
-    def suit_color(card_str):
-        if not card_str: return INK
+    def suit_symbol_color(card_str):
+        """Color for the suit symbol only — red for ♥♦, black for ♣♠"""
+        if not card_str: return BLACK
         if "♥" in card_str: return HEART_RED
-        if "♦" in card_str: return DIAMOND_GOLD
-        if "♣" in card_str: return CLUB_INK
-        if "♠" in card_str: return SPADE_INK
-        return INK
+        if "♦" in card_str: return DIAMOND_RED
+        return BLACK
+
+    def card_parts(card_str):
+        """Split '8♦' into ('8', '♦')"""
+        if not card_str or card_str == "—": return (card_str or "—", "")
+        for s in ["♥", "♦", "♣", "♠"]:
+            if s in card_str:
+                return (card_str.replace(s, "").strip(), s)
+        return (card_str, "")
+
+    def draw_card_text(c, card_str, x, y, font_name, font_size, white_override=False):
+        """Draw card with rank in black (or white) and suit in red/black."""
+        rank, suit = card_parts(card_str)
+        rank_color = white if white_override else BLACK
+        suit_clr = (white if white_override else suit_symbol_color(card_str))
+        # Draw rank
+        c.setFillColor(rank_color)
+        c.setFont(font_name, font_size)
+        c.drawString(x, y, rank)
+        # Draw suit symbol right after
+        rank_w = c.stringWidth(rank, font_name, font_size)
+        c.setFillColor(suit_clr)
+        c.drawString(x + rank_w, y, suit)
 
     W, H = letter  # 612 x 792
     buf = BytesIO()
@@ -492,9 +512,7 @@ def download_pdf():
     c.drawString(36, y + 4, "BIRTH CARD")
 
     bc_card = a.get("birth_card", "—")
-    c.setFillColor(suit_color(bc_card))
-    c.setFont("Helvetica-Bold", 28)
-    c.drawString(36, y - 26, bc_card)
+    draw_card_text(c, bc_card, 36, y - 26, "Helvetica-Bold", 28)
 
     title = a.get("description", {}).get("title", "")
     if title:
@@ -527,9 +545,7 @@ def download_pdf():
     c.setFont("Helvetica", 6.5)
     c.drawString(prc_x, y + 4, "PLANETARY RULING CARD")
 
-    c.setFillColor(suit_color(prc_card))
-    c.setFont("Helvetica-Bold", 28)
-    c.drawString(prc_x, y - 26, prc_card)
+    draw_card_text(c, prc_card, prc_x, y - 26, "Helvetica-Bold", 28)
 
     prc_title = a.get("prc_description", {}).get("title", "") if a.get("prc_description") else ""
     if prc_title:
@@ -637,9 +653,7 @@ def download_pdf():
         c.setFont("Helvetica", 7.5)
         c.drawString(col, py, p.upper())
 
-        c.setFillColor(white if is_active else suit_color(card))
-        c.setFont("Helvetica-Bold", 11)
-        c.drawString(col + 100, py, card)
+        draw_card_text(c, card, col + 100, py, "Helvetica-Bold", 11, white_override=is_active)
 
         if is_active:
             c.setFillColor(CRIMSON)
@@ -651,16 +665,12 @@ def download_pdf():
     c.setFillColor(MUTED)
     c.setFont("Helvetica", 7)
     c.drawString(36, pluto_y, f"Pluto: ")
-    c.setFillColor(suit_color(bc.get("pluto")))
-    c.setFont("Helvetica-Bold", 9)
-    c.drawString(36 + 35, pluto_y, bc.get("pluto", "—"))
+    draw_card_text(c, bc.get("pluto", "—"), 36 + 35, pluto_y, "Helvetica-Bold", 9)
 
     c.setFillColor(MUTED)
     c.setFont("Helvetica", 7)
     c.drawString(160, pluto_y, f"Result: ")
-    c.setFillColor(suit_color(bc.get("result")))
-    c.setFont("Helvetica-Bold", 9)
-    c.drawString(160 + 38, pluto_y, bc.get("result", "—"))
+    draw_card_text(c, bc.get("result", "—"), 160 + 38, pluto_y, "Helvetica-Bold", 9)
 
     # ── DIVIDER ──
     div3 = pluto_y - 14
@@ -682,25 +692,19 @@ def download_pdf():
     c.setFillColor(INK)
     c.setFont("Helvetica", 8)
     c.drawString(36, y4 - 20, "Environment")
-    c.setFillColor(suit_color(env_card))
-    c.setFont("Helvetica-Bold", 18)
-    c.drawString(36, y4 - 40, env_card)
+    draw_card_text(c, env_card, 36, y4 - 40, "Helvetica-Bold", 18)
 
     # Displacement
     c.setFillColor(INK)
     c.setFont("Helvetica", 8)
     c.drawString(180, y4 - 20, "Displacement")
-    c.setFillColor(suit_color(disp_card))
-    c.setFont("Helvetica-Bold", 18)
-    c.drawString(180, y4 - 40, disp_card)
+    draw_card_text(c, disp_card, 180, y4 - 40, "Helvetica-Bold", 18)
 
     # Long Range
     c.setFillColor(INK)
     c.setFont("Helvetica", 8)
     c.drawString(340, y4 - 20, "Long Range")
-    c.setFillColor(suit_color(lr_card))
-    c.setFont("Helvetica-Bold", 18)
-    c.drawString(340, y4 - 40, lr_card)
+    draw_card_text(c, lr_card, 340, y4 - 40, "Helvetica-Bold", 18)
     c.setFillColor(MUTED)
     c.setFont("Helvetica", 7)
     c.drawString(340 + c.stringWidth(lr_card + " ", "Helvetica-Bold", 18), y4 - 38, lr_planet)
