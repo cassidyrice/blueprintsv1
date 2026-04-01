@@ -27,6 +27,67 @@
   .app { position: relative; z-index: 1; display: grid; grid-template-columns: 240px 1fr; min-height: 100vh; }
   @media (max-width: 768px) { .app { grid-template-columns: 1fr; } .sidebar { display: none; } }
 
+  /* MOBILE NAV BAR — replaces sidebar on mobile */
+  .mobile-nav { display: none; }
+  @media (max-width: 768px) {
+    .mobile-nav {
+      display: flex;
+      background: var(--ink);
+      padding: 0;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      border-bottom: 2px solid var(--accent);
+    }
+    .mobile-nav-item {
+      flex: 1;
+      padding: 14px 8px;
+      font-size: 0.6rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      text-align: center;
+      color: rgba(244,240,232,0.5);
+      cursor: pointer;
+      transition: all 0.15s;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+    }
+    .mobile-nav-item.active { color: var(--paper); border-bottom-color: var(--accent); }
+    main { padding: 20px 16px; }
+    .page-header { margin-bottom: 20px; padding-bottom: 14px; }
+    .page-title { font-size: 1.3rem; }
+    .page-meta { font-size: 0.58rem; }
+
+    /* Blueprint input — stack naturally */
+    .input-row { gap: 8px; }
+    .input-group input { width: 70px; font-size: 0.78rem; padding: 10px 10px; }
+    .input-group input.wide { width: 70px; }
+    .input-group input[style*="106px"] { width: 88px !important; }
+    .btn { padding: 10px 18px; font-size: 0.65rem; }
+
+    /* Compatibility inputs — stack vertically on mobile */
+    .compat-inputs-grid { grid-template-columns: 1fr !important; gap: 20px !important; }
+    .compat-inputs-grid .input-group input { width: calc(33% - 8px) !important; min-width: 64px; }
+    .compat-inputs-grid .input-row { display: grid !important; grid-template-columns: 1fr 1fr 1fr !important; gap: 8px !important; align-items: end; }
+
+    /* Share button full width on mobile */
+    #shareBtn { width: 100%; justify-content: center; padding: 14px; font-size: 0.72rem; }
+
+    /* Tabs — tighter on mobile */
+    .tabs { margin-bottom: 20px; }
+    .tab { padding: 10px 12px; font-size: 0.6rem; }
+
+    /* Cards slightly smaller */
+    .big-card { width: 52px; height: 74px; }
+    .big-card .cs { font-size: 1.3rem; }
+
+    /* Atmosphere cards bigger tap target */
+    .atm-card { font-size: 1.5rem; padding: 4px 0; display: block; }
+
+    /* Modal full width bottom sheet */
+    .modal { max-width: 100%; border-radius: 12px 12px 0 0; padding: 24px 20px 40px; }
+  }
+
   /* SIDEBAR */
   .sidebar { background: var(--ink); color: var(--paper); padding: 28px 20px; display: flex; flex-direction: column; gap: 28px; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
   .sidebar-logo { font-family: 'Playfair Display', serif; font-size: 1rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
@@ -178,6 +239,13 @@
 </style>
 </head>
 <body>
+
+<!-- MOBILE NAV BAR -->
+<nav class="mobile-nav">
+  <div class="mobile-nav-item active" id="mnav-blueprint" onclick="showTab('blueprint')">Blueprint</div>
+  <div class="mobile-nav-item" id="mnav-compatibility" onclick="showTab('compatibility')">Compatibility</div>
+</nav>
+
 <div class="app">
   <aside class="sidebar">
     <div class="sidebar-logo">Card <span>Blueprints</span></div>
@@ -293,21 +361,21 @@
 
     <!-- COMPATIBILITY -->
     <div class="tab-panel" id="panel-compatibility">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:14px">
+      <div class="compat-inputs-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:14px">
         <div>
           <div style="font-size:0.58rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);margin-bottom:10px">Person 1</div>
           <div class="input-row" style="margin-bottom:0;flex-wrap:wrap">
-            <div class="input-group"><label>Mo</label><input type="number" id="c1-month" min="1" max="12" placeholder="MM"></div>
-            <div class="input-group"><label>Day</label><input type="number" id="c1-day" min="1" max="31" placeholder="DD"></div>
-            <div class="input-group"><label>Year</label><input type="number" id="c1-year" min="1900" max="2010" placeholder="YYYY" style="width:96px"></div>
+            <div class="input-group"><label>Mo</label><input type="number" id="c1-month" min="1" max="12" placeholder="MM" style="width:100%"></div>
+            <div class="input-group"><label>Day</label><input type="number" id="c1-day" min="1" max="31" placeholder="DD" style="width:100%"></div>
+            <div class="input-group"><label>Year</label><input type="number" id="c1-year" min="1900" max="2010" placeholder="YYYY" style="width:100%"></div>
           </div>
         </div>
         <div>
           <div style="font-size:0.58rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);margin-bottom:10px">Person 2</div>
           <div class="input-row" style="margin-bottom:0;flex-wrap:wrap">
-            <div class="input-group"><label>Mo</label><input type="number" id="c2-month" min="1" max="12" placeholder="MM"></div>
-            <div class="input-group"><label>Day</label><input type="number" id="c2-day" min="1" max="31" placeholder="DD"></div>
-            <div class="input-group"><label>Year</label><input type="number" id="c2-year" min="1900" max="2010" placeholder="YYYY" style="width:96px"></div>
+            <div class="input-group"><label>Mo</label><input type="number" id="c2-month" min="1" max="12" placeholder="MM" style="width:100%"></div>
+            <div class="input-group"><label>Day</label><input type="number" id="c2-day" min="1" max="31" placeholder="DD" style="width:100%"></div>
+            <div class="input-group"><label>Year</label><input type="number" id="c2-year" min="1900" max="2010" placeholder="YYYY" style="width:100%"></div>
           </div>
         </div>
       </div>
@@ -602,7 +670,7 @@ async function shareBlueprint() {
   const bc = bp.birth_card_spread;
 
   // Canvas dimensions — portrait, TikTok-friendly ratio
-  const W = 800, H = 1200;
+  const W = 1080, H = 1920;
   const canvas = document.getElementById('shareCanvas');
   canvas.width = W; canvas.height = H;
   const ctx = canvas.getContext('2d');
