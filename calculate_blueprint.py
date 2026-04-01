@@ -8092,7 +8092,7 @@ def calculate_blueprint(birth_month, birth_day, birth_year, target_date=None):
             "description": CARD_DESCRIPTIONS.get(bc),
             "prc_description": CARD_DESCRIPTIONS.get(prc_primary)
         },
-        "timing": {"age": age, "sy_karma": sy_karma, "sy_nav": sy_nav, "crown": spread_nav["crown"]},
+        "timing": {"age": age, "sy_karma": sy_karma, "sy_nav": sy_nav, "crown": spread_nav["crown"], "grid": spread_nav["grid"]},
         "birth_card_spread": {
             "anchor": bc, 
             "periods": bc_periods,

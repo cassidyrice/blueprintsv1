@@ -440,8 +440,9 @@ def download_pdf():
     bc = bp.get("birth_card_spread", {})
     karma = bp.get("karma", {}).get("bc_yearly", {})
     lr = bp.get("long_range", {}).get("bc", {})
+    timing = bp.get("timing", {})
 
-    # --- Brand colors (from branding image) ---
+    # --- Brand colors ---
     PRUSSIAN   = HexColor("#1c3f6e")
     CREAM      = HexColor("#ede8dc")
     CRIMSON    = HexColor("#b5231a")
@@ -450,16 +451,17 @@ def download_pdf():
     HEART_RED  = HexColor("#b5231a")
     DIAMOND_RED = HexColor("#b5231a")
     BLACK      = HexColor("#1a1a1a")
+    HIGHLIGHT  = HexColor("#d6cfc2")
+    GRID_BG    = HexColor("#f5f1ea")
+    GRID_BORDER = HexColor("#c8c0b0")
 
     def suit_symbol_color(card_str):
-        """Color for the suit symbol only — red for ♥♦, black for ♣♠"""
         if not card_str: return BLACK
         if "♥" in card_str: return HEART_RED
         if "♦" in card_str: return DIAMOND_RED
         return BLACK
 
     def card_parts(card_str):
-        """Split '8♦' into ('8', '♦')"""
         if not card_str or card_str == "—": return (card_str or "—", "")
         for s in ["♥", "♦", "♣", "♠"]:
             if s in card_str:
@@ -467,259 +469,345 @@ def download_pdf():
         return (card_str, "")
 
     def draw_card_text(c, card_str, x, y, font_name, font_size, white_override=False):
-        """Draw card with rank in black (or white) and suit in red/black."""
         rank, suit = card_parts(card_str)
         rank_color = white if white_override else BLACK
         suit_clr = (white if white_override else suit_symbol_color(card_str))
-        # Draw rank
         c.setFillColor(rank_color)
         c.setFont(font_name, font_size)
         c.drawString(x, y, rank)
-        # Draw suit symbol right after
         rank_w = c.stringWidth(rank, font_name, font_size)
         c.setFillColor(suit_clr)
         c.drawString(x + rank_w, y, suit)
 
+    def draw_card_centered(c, card_str, cx, cy, font_name, font_size, white_override=False):
+        rank, suit = card_parts(card_str)
+        full = rank + suit
+        total_w = c.stringWidth(full, font_name, font_size)
+        x = cx - total_w / 2
+        draw_card_text(c, card_str, x, cy, font_name, font_size, white_override)
+
+    def wrap_text(c, text, x, y, max_w, font, size, max_lines=2):
+        words = text.split()
+        lines, line = [], ""
+        for w in words:
+            test = line + w + " "
+            if c.stringWidth(test, font, size) > max_w:
+                lines.append(line)
+                line = w + " "
+            else:
+                line = test
+        if line: lines.append(line)
+        c.setFont(font, size)
+        for i, ln in enumerate(lines[:max_lines]):
+            c.drawString(x, y - i * (size + 2), ln)
+        return min(len(lines), max_lines) * (size + 2)
+
     W, H = letter  # 612 x 792
     buf = BytesIO()
     c = pdf_canvas.Canvas(buf, pagesize=letter)
+    L = 30  # left margin
+    R = W - 30  # right margin
 
     # ── PAGE BACKGROUND ──
     c.setFillColor(CREAM)
     c.rect(0, 0, W, H, fill=1, stroke=0)
 
-    # ── TOP BAR ──
+    # ── TOP BAR (compact) ──
     c.setFillColor(PRUSSIAN)
-    c.rect(0, H - 72, W, 72, fill=1, stroke=0)
-
-    # Logo text
+    c.rect(0, H - 52, W, 52, fill=1, stroke=0)
     c.setFillColor(white)
-    c.setFont("Helvetica-Bold", 11)
-    c.drawString(36, H - 38, "THE ANALOG")
+    c.setFont("Helvetica-Bold", 9)
+    c.drawString(L, H - 30, "THE ANALOG")
     c.setFillColor(CRIMSON)
-    c.drawString(36 + c.stringWidth("THE ANALOG ", "Helvetica-Bold", 11), H - 38, "ALGORITHM")
+    c.drawString(L + c.stringWidth("THE ANALOG ", "Helvetica-Bold", 9), H - 30, "ALGORITHM")
     c.setFillColor(HexColor("#ffffff80"))
-    c.setFont("Helvetica", 7)
-    c.drawRightString(W - 36, H - 34, "theanalogalgorithm.com")
     c.setFont("Helvetica", 6)
-    c.drawRightString(W - 36, H - 46, "the math is the math")
+    c.drawRightString(R, H - 26, "theanalogalgorithm.com")
+    c.setFont("Helvetica", 5.5)
+    c.drawRightString(R, H - 35, "the math is the math")
 
-    # ── SECTION: Birth Card + PRC ──
-    y = H - 108
+    # ── BIRTH CARD + PRC (side by side, compact) ──
+    y = H - 72
 
     c.setFillColor(MUTED)
-    c.setFont("Helvetica", 6.5)
-    c.drawString(36, y + 4, "BIRTH CARD")
+    c.setFont("Helvetica", 5.5)
+    c.drawString(L, y, "BIRTH CARD")
 
     bc_card = a.get("birth_card", "—")
-    draw_card_text(c, bc_card, 36, y - 26, "Helvetica-Bold", 28)
-
+    draw_card_text(c, bc_card, L, y - 18, "Helvetica-Bold", 22)
     title = a.get("description", {}).get("title", "")
     if title:
         c.setFillColor(INK)
-        c.setFont("Helvetica-Bold", 11)
-        c.drawString(36, y - 44, title)
+        c.setFont("Helvetica-Bold", 8)
+        c.drawString(L, y - 32, title)
 
-    core = (a.get("description", {}).get("core_identity", "") or "")[:120]
-    if core:
-        c.setFillColor(MUTED)
-        c.setFont("Helvetica", 7.5)
-        # Simple word wrap
-        words = core.split()
-        lines, line = [], ""
-        for w in words:
-            test = line + w + " "
-            if c.stringWidth(test, "Helvetica", 7.5) > 320:
-                lines.append(line)
-                line = w + " "
-            else:
-                line = test
-        if line: lines.append(line)
-        for i, ln in enumerate(lines[:3]):
-            c.drawString(36, y - 58 - i * 11, ln)
-
-    # PRC on right side
     prc_card = a.get("prc", "—")
-    prc_x = W / 2 + 30
+    mid = W / 2 + 10
     c.setFillColor(MUTED)
-    c.setFont("Helvetica", 6.5)
-    c.drawString(prc_x, y + 4, "PLANETARY RULING CARD")
-
-    draw_card_text(c, prc_card, prc_x, y - 26, "Helvetica-Bold", 28)
-
+    c.setFont("Helvetica", 5.5)
+    c.drawString(mid, y, "PLANETARY RULING CARD")
+    draw_card_text(c, prc_card, mid, y - 18, "Helvetica-Bold", 22)
     prc_title = a.get("prc_description", {}).get("title", "") if a.get("prc_description") else ""
     if prc_title:
         c.setFillColor(INK)
-        c.setFont("Helvetica-Bold", 11)
-        c.drawString(prc_x, y - 44, prc_title)
-
-    prc_core = (a.get("prc_description", {}).get("core_identity", "") or "")[:120]
-    if prc_core:
-        c.setFillColor(MUTED)
-        c.setFont("Helvetica", 7.5)
-        words = prc_core.split()
-        lines, line = [], ""
-        for w in words:
-            test = line + w + " "
-            if c.stringWidth(test, "Helvetica", 7.5) > 220:
-                lines.append(line)
-                line = w + " "
-            else:
-                line = test
-        if line: lines.append(line)
-        for i, ln in enumerate(lines[:3]):
-            c.drawString(prc_x, y - 58 - i * 11, ln)
+        c.setFont("Helvetica-Bold", 8)
+        c.drawString(mid, y - 32, prc_title)
 
     # ── DIVIDER ──
-    div1 = y - 95
-    c.setStrokeColor(HexColor("#c8c0b0"))
+    div1 = y - 42
+    c.setStrokeColor(GRID_BORDER)
     c.setLineWidth(0.5)
-    c.line(36, div1, W - 36, div1)
+    c.line(L, div1, R, div1)
 
-    # ── SECTION: Active Period ──
-    y2 = div1 - 18
+    # ── ACTIVE PERIOD (compact) ──
+    y2 = div1 - 12
     c.setFillColor(MUTED)
-    c.setFont("Helvetica", 6.5)
-    c.drawString(36, y2, "ACTIVE PERIOD")
+    c.setFont("Helvetica", 5.5)
+    c.drawString(L, y2, "ACTIVE PERIOD")
 
     planet_name = ap.get("planet", "—")
     ap_card = ap.get("bc_card", "—")
     c.setFillColor(PRUSSIAN)
-    c.setFont("Helvetica-Bold", 18)
-    c.drawString(36, y2 - 22, f"{planet_name}  ·  {ap_card}")
-
+    c.setFont("Helvetica-Bold", 14)
+    c.drawString(L, y2 - 16, f"{planet_name}  ·  {ap_card}")
     domain = ap.get("domain", "")
     if domain:
         c.setFillColor(MUTED)
-        c.setFont("Helvetica", 8)
-        c.drawString(36, y2 - 36, domain)
+        c.setFont("Helvetica", 6.5)
+        c.drawString(L, y2 - 26, domain)
 
-    # Three-lens interpretation
+    # Three-lens (single line each)
     ib = ap.get("interpretation_bc") or {}
-    lens_y = y2 - 56
+    lens_y = y2 - 40
     for label_name, key in [("UNDER", "under"), ("SWEET SPOT", "sweet_spot"), ("OVER", "over")]:
         text = ib.get(key, "")
-        if not text:
-            continue
+        if not text: continue
         c.setFillColor(CRIMSON)
-        c.setFont("Helvetica-Bold", 6)
-        c.drawString(36, lens_y, label_name)
-
+        c.setFont("Helvetica-Bold", 5)
+        c.drawString(L, lens_y, label_name)
         c.setFillColor(INK)
-        c.setFont("Helvetica", 7.5)
-        # Word wrap the interpretation text
-        words = text.split()
-        lines, line = [], ""
-        for w in words:
-            test = line + w + " "
-            if c.stringWidth(test, "Helvetica", 7.5) > (W - 80):
-                lines.append(line)
-                line = w + " "
-            else:
-                line = test
-        if line: lines.append(line)
-        for i, ln in enumerate(lines[:2]):
-            c.drawString(36, lens_y - 11 - i * 10, ln)
-        lens_y -= 11 + min(len(lines), 2) * 10 + 8
+        used = wrap_text(c, text, L, lens_y - 9, R - L, "Helvetica", 6.5, max_lines=2)
+        lens_y -= 9 + used + 3
 
     # ── DIVIDER ──
-    div2 = lens_y - 6
-    c.setStrokeColor(HexColor("#c8c0b0"))
-    c.line(36, div2, W - 36, div2)
+    div2 = lens_y - 3
+    c.setStrokeColor(GRID_BORDER)
+    c.line(L, div2, R, div2)
 
-    # ── SECTION: Planetary Periods ──
-    y3 = div2 - 18
+    # ── PLANETARY PERIODS + ATMOSPHERE (side by side) ──
+    y3 = div2 - 12
     c.setFillColor(MUTED)
-    c.setFont("Helvetica", 6.5)
-    c.drawString(36, y3, "PLANETARY PERIODS")
+    c.setFont("Helvetica", 5.5)
+    c.drawString(L, y3, "PLANETARY PERIODS")
 
     planets = ["Mercury", "Venus", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune"]
     periods = bc.get("periods", {})
-
-    col1_x, col2_x = 36, W / 2 + 20
-    row_h = 22
+    row_h = 14
     for i, p in enumerate(planets):
-        col = col1_x if i < 4 else col2_x
-        row = i if i < 4 else i - 4
-        py = y3 - 20 - row * row_h
+        py = y3 - 14 - i * row_h
         card = periods.get(p, "—")
         is_active = p == planet_name
-
         if is_active:
             c.setFillColor(PRUSSIAN)
-            c.rect(col - 4, py - 5, 240, 18, fill=1, stroke=0)
-
+            c.rect(L - 2, py - 3, 195, 13, fill=1, stroke=0)
         c.setFillColor(white if is_active else MUTED)
-        c.setFont("Helvetica", 7.5)
-        c.drawString(col, py, p.upper())
-
-        draw_card_text(c, card, col + 100, py, "Helvetica-Bold", 11, white_override=is_active)
-
+        c.setFont("Helvetica", 6.5)
+        c.drawString(L, py, p.upper())
+        draw_card_text(c, card, L + 75, py, "Helvetica-Bold", 8, white_override=is_active)
         if is_active:
             c.setFillColor(CRIMSON)
-            c.setFont("Helvetica-Bold", 6)
-            c.drawString(col + 100 + c.stringWidth(card + "  ", "Helvetica-Bold", 11), py, "NOW")
+            c.setFont("Helvetica-Bold", 5)
+            c.drawString(L + 75 + c.stringWidth(card + " ", "Helvetica-Bold", 8) + 2, py + 1, "NOW")
 
-    # Pluto + Result below periods
-    pluto_y = y3 - 20 - 4 * row_h - 8
+    pluto_y = y3 - 14 - 7 * row_h - 4
     c.setFillColor(MUTED)
-    c.setFont("Helvetica", 7)
-    c.drawString(36, pluto_y, f"Pluto: ")
-    draw_card_text(c, bc.get("pluto", "—"), 36 + 35, pluto_y, "Helvetica-Bold", 9)
-
+    c.setFont("Helvetica", 6)
+    c.drawString(L, pluto_y, "Pluto:")
+    draw_card_text(c, bc.get("pluto", "—"), L + 32, pluto_y, "Helvetica-Bold", 7)
     c.setFillColor(MUTED)
-    c.setFont("Helvetica", 7)
-    c.drawString(160, pluto_y, f"Result: ")
-    draw_card_text(c, bc.get("result", "—"), 160 + 38, pluto_y, "Helvetica-Bold", 9)
+    c.drawString(L + 80, pluto_y, "Result:")
+    draw_card_text(c, bc.get("result", "—"), L + 115, pluto_y, "Helvetica-Bold", 7)
 
-    # ── DIVIDER ──
-    div3 = pluto_y - 14
-    c.setStrokeColor(HexColor("#c8c0b0"))
-    c.line(36, div3, W - 36, div3)
-
-    # ── SECTION: Yearly Atmosphere ──
-    y4 = div3 - 18
+    # Atmosphere on right side
+    atm_x = W / 2 + 20
     c.setFillColor(MUTED)
-    c.setFont("Helvetica", 6.5)
-    c.drawString(36, y4, "YEARLY ATMOSPHERE")
+    c.setFont("Helvetica", 5.5)
+    c.drawString(atm_x, y3, "YEARLY ATMOSPHERE")
 
     env_card = karma.get("environment", "—") if karma else "—"
     disp_card = karma.get("displacement", "—") if karma else "—"
     lr_card = lr.get("card", "—") if lr else "—"
-    lr_planet = lr.get("planet", "—") if lr else "—"
+    lr_planet_name = lr.get("planet", "—") if lr else "—"
 
-    # Environment
-    c.setFillColor(INK)
-    c.setFont("Helvetica", 8)
-    c.drawString(36, y4 - 20, "Environment")
-    draw_card_text(c, env_card, 36, y4 - 40, "Helvetica-Bold", 18)
-
-    # Displacement
-    c.setFillColor(INK)
-    c.setFont("Helvetica", 8)
-    c.drawString(180, y4 - 20, "Displacement")
-    draw_card_text(c, disp_card, 180, y4 - 40, "Helvetica-Bold", 18)
-
-    # Long Range
-    c.setFillColor(INK)
-    c.setFont("Helvetica", 8)
-    c.drawString(340, y4 - 20, "Long Range")
-    draw_card_text(c, lr_card, 340, y4 - 40, "Helvetica-Bold", 18)
+    for i, (label, card_val) in enumerate([("Environment", env_card), ("Displacement", disp_card), ("Long Range", lr_card)]):
+        ay = y3 - 14 - i * 28
+        c.setFillColor(INK)
+        c.setFont("Helvetica", 6)
+        c.drawString(atm_x, ay, label)
+        draw_card_text(c, card_val, atm_x, ay - 14, "Helvetica-Bold", 14)
+    # Long range planet label
     c.setFillColor(MUTED)
-    c.setFont("Helvetica", 7)
-    c.drawString(340 + c.stringWidth(lr_card + " ", "Helvetica-Bold", 18), y4 - 38, lr_planet)
+    c.setFont("Helvetica", 5.5)
+    lr_x = atm_x + c.stringWidth(lr_card + " ", "Helvetica-Bold", 14) + 2
+    c.drawString(lr_x, y3 - 14 - 2 * 28 - 12, lr_planet_name)
+
+    # ── DIVIDER ──
+    div3 = pluto_y - 10
+    c.setStrokeColor(GRID_BORDER)
+    c.line(L, div3, R, div3)
+
+    # ══════════════════════════════════════════════════════════════════════
+    # ── 7×7 GRID + CROWN ROW ──
+    # ══════════════════════════════════════════════════════════════════════
+
+    grid = timing.get("grid", [])
+    crown = timing.get("crown", [])
+    age = timing.get("age", "?")
+    sy_nav = timing.get("sy_nav", "?")
+
+    # Build a map: card -> (label_symbol, is_highlighted)
+    PLANET_SYMBOLS = {
+        "Mercury": "☿", "Venus": "♀", "Mars": "♂", "Jupiter": "♃",
+        "Saturn": "♄", "Uranus": "♅", "Neptune": "♆"
+    }
+    card_labels = {}
+    for p_name, card_val in periods.items():
+        if card_val and card_val != "—":
+            card_labels[card_val] = PLANET_SYMBOLS.get(p_name, "")
+    if bc.get("pluto") and bc["pluto"] != "—":
+        card_labels[bc["pluto"]] = "P"
+    if bc.get("result") and bc["result"] != "—":
+        card_labels[bc["result"]] = "R"
+    if env_card and env_card != "—":
+        card_labels.setdefault(env_card, "E")
+    if disp_card and disp_card != "—":
+        card_labels.setdefault(disp_card, "D")
+    if lr_card and lr_card != "—":
+        card_labels.setdefault(lr_card, "LR")
+    # Mark birth card and PRC
+    if bc_card and bc_card != "—":
+        card_labels.setdefault(bc_card, "★")
+    if prc_card and prc_card != "—":
+        card_labels.setdefault(prc_card, "◆")
+
+    grid_top = div3 - 10
+    c.setFillColor(MUTED)
+    c.setFont("Helvetica", 5.5)
+    c.drawString(L, grid_top, f"SOLAR SPREAD — AGE {age} (SPREAD {sy_nav})")
+
+    # Grid dimensions
+    grid_y_start = grid_top - 14
+    cell_w = (R - L) / 7
+    cell_h = 24
+    crown_h = 22
+
+    ROW_PLANETS = ["☿", "♀", "♂", "♃", "♄", "♅", "♆"]
+    COL_PLANETS = ["☿", "♀", "♂", "♃", "♄", "♅", "♆"]
+
+    # Column headers
+    for col in range(7):
+        cx = L + col * cell_w + cell_w / 2
+        c.setFillColor(PRUSSIAN)
+        c.setFont("Helvetica", 6)
+        c.drawCentredString(cx, grid_y_start + 2, COL_PLANETS[col])
+
+    grid_y_start -= 4
+
+    # Draw crown row first (3 cards centered)
+    crown_y = grid_y_start - crown_h
+    crown_total_w = 3 * cell_w
+    crown_x_start = L + (7 * cell_w - crown_total_w) / 2
+
+    c.setFillColor(MUTED)
+    c.setFont("Helvetica", 4.5)
+    c.drawString(L, crown_y + crown_h / 2 - 2, "CROWN")
+
+    for ci, cc in enumerate(crown):
+        cx = crown_x_start + ci * cell_w
+        cy = crown_y
+        # Highlight if labeled
+        if cc in card_labels:
+            c.setFillColor(HexColor("#1c3f6e18"))
+            c.rect(cx, cy, cell_w, crown_h, fill=1, stroke=0)
+        c.setStrokeColor(GRID_BORDER)
+        c.setLineWidth(0.3)
+        c.rect(cx, cy, cell_w, crown_h, fill=0, stroke=1)
+        # Card text
+        draw_card_centered(c, cc, cx + cell_w / 2, cy + 6, "Helvetica-Bold", 7.5)
+        # Label in top-right corner
+        if cc in card_labels:
+            c.setFillColor(CRIMSON)
+            c.setFont("Helvetica-Bold", 5)
+            c.drawRightString(cx + cell_w - 2, cy + crown_h - 7, card_labels[cc])
+
+    # Draw 7×7 grid
+    for row in range(7):
+        for col in range(7):
+            if row >= len(grid) or col >= len(grid[row]):
+                continue
+            card_val = grid[row][col]
+            cx = L + col * cell_w
+            cy = crown_y - (row + 1) * cell_h
+
+            # Highlight if labeled
+            if card_val in card_labels:
+                c.setFillColor(HexColor("#1c3f6e18"))
+                c.rect(cx, cy, cell_w, cell_h, fill=1, stroke=0)
+
+            # Cell border
+            c.setStrokeColor(GRID_BORDER)
+            c.setLineWidth(0.3)
+            c.rect(cx, cy, cell_w, cell_h, fill=0, stroke=1)
+
+            # Card text centered
+            draw_card_centered(c, card_val, cx + cell_w / 2, cy + 7, "Helvetica-Bold", 7.5)
+
+            # Label in top-right corner
+            if card_val in card_labels:
+                c.setFillColor(CRIMSON)
+                c.setFont("Helvetica-Bold", 5)
+                c.drawRightString(cx + cell_w - 2, cy + cell_h - 7, card_labels[card_val])
+
+        # Row planet label on left margin
+        row_label_y = crown_y - (row + 1) * cell_h + cell_h / 2 - 3
+        c.setFillColor(PRUSSIAN)
+        c.setFont("Helvetica", 6)
+        # Shift grid right to make room? No — put label in left gutter
+        # Actually let's put it at the left edge of each row
+
+    # ── LEGEND ──
+    legend_y = crown_y - 8 * cell_h - 6
+    c.setFillColor(MUTED)
+    c.setFont("Helvetica", 5)
+    legend_items = [
+        ("☿", "Mercury"), ("♀", "Venus"), ("♂", "Mars"), ("♃", "Jupiter"),
+        ("♄", "Saturn"), ("♅", "Uranus"), ("♆", "Neptune"),
+        ("P", "Pluto"), ("R", "Result"), ("E", "Environ."), ("D", "Displace."),
+        ("LR", "Long Range"), ("★", "Birth Card"), ("◆", "PRC")
+    ]
+    lx = L
+    for sym, label in legend_items:
+        c.setFillColor(CRIMSON)
+        c.setFont("Helvetica-Bold", 5)
+        c.drawString(lx, legend_y, sym)
+        sw = c.stringWidth(sym, "Helvetica-Bold", 5)
+        c.setFillColor(MUTED)
+        c.setFont("Helvetica", 4.5)
+        c.drawString(lx + sw + 1, legend_y, label)
+        lx += sw + c.stringWidth(label, "Helvetica", 4.5) + 8
+        if lx > R - 30:
+            lx = L
+            legend_y -= 8
 
     # ── BOTTOM BAR ──
     c.setFillColor(PRUSSIAN)
-    c.rect(0, 0, W, 44, fill=1, stroke=0)
-    c.setFillColor(HexColor("#ffffff70"))
-    c.setFont("Helvetica", 7)
-    c.drawCentredString(W / 2, 20, "The Analog Algorithm  ·  Mathematical Pattern Recognition  ·  theanalogalgorithm.com")
-
-    # ── Crimson accent line at top of bottom bar ──
+    c.rect(0, 0, W, 32, fill=1, stroke=0)
     c.setStrokeColor(CRIMSON)
-    c.setLineWidth(2)
-    c.line(0, 44, W, 44)
+    c.setLineWidth(1.5)
+    c.line(0, 32, W, 32)
+    c.setFillColor(HexColor("#ffffff70"))
+    c.setFont("Helvetica", 6)
+    c.drawCentredString(W / 2, 13, "The Analog Algorithm  ·  Mathematical Pattern Recognition  ·  theanalogalgorithm.com")
 
     c.save()
     buf.seek(0)
