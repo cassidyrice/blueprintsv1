@@ -451,7 +451,7 @@ def download_pdf():
     HEART_RED  = HexColor("#b5231a")
     DIAMOND_RED = HexColor("#b5231a")
     BLACK      = HexColor("#1a1a1a")
-    HIGHLIGHT  = HexColor("#d6cfc2")
+    HIGHLIGHT  = HexColor("#f0d9d4")
     GRID_BG    = HexColor("#f5f1ea")
     GRID_BORDER = HexColor("#c8c0b0")
 
@@ -727,7 +727,7 @@ def download_pdf():
         cy = crown_y
         # Highlight if labeled
         if cc in card_labels:
-            c.setFillColor(HexColor("#d6cfc2"))
+            c.setFillColor(HexColor("#f0d9d4"))
             c.rect(cx, cy, cell_w, crown_h, fill=1, stroke=0)
         c.setStrokeColor(GRID_BORDER)
         c.setLineWidth(0.3)
@@ -751,7 +751,7 @@ def download_pdf():
 
             # Highlight if labeled
             if card_val in card_labels:
-                c.setFillColor(HexColor("#d6cfc2"))
+                c.setFillColor(HexColor("#f0d9d4"))
                 c.rect(cx, cy, cell_w, cell_h, fill=1, stroke=0)
 
             # Cell border
