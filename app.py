@@ -727,7 +727,7 @@ def download_pdf():
         cy = crown_y
         # Highlight if labeled
         if cc in card_labels:
-            c.setFillColor(HexColor("#1c3f6e18"))
+            c.setFillColor(HexColor("#d6cfc2"))
             c.rect(cx, cy, cell_w, crown_h, fill=1, stroke=0)
         c.setStrokeColor(GRID_BORDER)
         c.setLineWidth(0.3)
@@ -751,7 +751,7 @@ def download_pdf():
 
             # Highlight if labeled
             if card_val in card_labels:
-                c.setFillColor(HexColor("#1c3f6e18"))
+                c.setFillColor(HexColor("#d6cfc2"))
                 c.rect(cx, cy, cell_w, cell_h, fill=1, stroke=0)
 
             # Cell border
