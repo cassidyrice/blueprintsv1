@@ -416,6 +416,321 @@ Paragraph 3: Yearly atmosphere + long range operating conditions.
         return jsonify({"error": str(e)}), 500
 
 # ---------------------------------------------------------------------------
+# PDF Blueprint Download
+# ---------------------------------------------------------------------------
+@app.route("/download-pdf", methods=["POST"])
+def download_pdf():
+    email = session.get("email")
+    if not email or not get_subscriber(email):
+        return jsonify({"error": "Not subscribed"}), 403
+
+    from io import BytesIO
+    from reportlab.lib.pagesizes import letter
+    from reportlab.lib.units import inch
+    from reportlab.lib.colors import HexColor, white
+    from reportlab.pdfgen import canvas as pdf_canvas
+
+    data = request.json
+    if not data or "blueprint" not in data:
+        return jsonify({"error": "No blueprint data"}), 400
+
+    bp = data["blueprint"]
+    a = bp.get("archetype", {})
+    ap = bp.get("active_period", {})
+    bc = bp.get("birth_card_spread", {})
+    karma = bp.get("karma", {}).get("bc_yearly", {})
+    lr = bp.get("long_range", {}).get("bc", {})
+
+    # --- Brand colors (from branding image) ---
+    PRUSSIAN   = HexColor("#1c3f6e")
+    CREAM      = HexColor("#ede8dc")
+    CRIMSON    = HexColor("#b5231a")
+    INK        = HexColor("#1a1a1a")
+    MUTED      = HexColor("#7a7060")
+    HEART_RED  = HexColor("#b5231a")
+    DIAMOND_GOLD = HexColor("#b5231a")
+    CLUB_INK   = HexColor("#1c3f6e")
+    SPADE_INK  = HexColor("#1a1a1a")
+
+    def suit_color(card_str):
+        if not card_str: return INK
+        if "♥" in card_str: return HEART_RED
+        if "♦" in card_str: return DIAMOND_GOLD
+        if "♣" in card_str: return CLUB_INK
+        if "♠" in card_str: return SPADE_INK
+        return INK
+
+    W, H = letter  # 612 x 792
+    buf = BytesIO()
+    c = pdf_canvas.Canvas(buf, pagesize=letter)
+
+    # ── PAGE BACKGROUND ──
+    c.setFillColor(CREAM)
+    c.rect(0, 0, W, H, fill=1, stroke=0)
+
+    # ── TOP BAR ──
+    c.setFillColor(PRUSSIAN)
+    c.rect(0, H - 72, W, 72, fill=1, stroke=0)
+
+    # Logo text
+    c.setFillColor(white)
+    c.setFont("Helvetica-Bold", 11)
+    c.drawString(36, H - 38, "THE ANALOG")
+    c.setFillColor(CRIMSON)
+    c.drawString(36 + c.stringWidth("THE ANALOG ", "Helvetica-Bold", 11), H - 38, "ALGORITHM")
+    c.setFillColor(HexColor("#ffffff80"))
+    c.setFont("Helvetica", 7)
+    c.drawRightString(W - 36, H - 34, "theanalogalgorithm.com")
+    c.setFont("Helvetica", 6)
+    c.drawRightString(W - 36, H - 46, "the math is the math")
+
+    # ── SECTION: Birth Card + PRC ──
+    y = H - 108
+
+    c.setFillColor(MUTED)
+    c.setFont("Helvetica", 6.5)
+    c.drawString(36, y + 4, "BIRTH CARD")
+
+    bc_card = a.get("birth_card", "—")
+    c.setFillColor(suit_color(bc_card))
+    c.setFont("Helvetica-Bold", 28)
+    c.drawString(36, y - 26, bc_card)
+
+    title = a.get("description", {}).get("title", "")
+    if title:
+        c.setFillColor(INK)
+        c.setFont("Helvetica-Bold", 11)
+        c.drawString(36, y - 44, title)
+
+    core = (a.get("description", {}).get("core_identity", "") or "")[:120]
+    if core:
+        c.setFillColor(MUTED)
+        c.setFont("Helvetica", 7.5)
+        # Simple word wrap
+        words = core.split()
+        lines, line = [], ""
+        for w in words:
+            test = line + w + " "
+            if c.stringWidth(test, "Helvetica", 7.5) > 320:
+                lines.append(line)
+                line = w + " "
+            else:
+                line = test
+        if line: lines.append(line)
+        for i, ln in enumerate(lines[:3]):
+            c.drawString(36, y - 58 - i * 11, ln)
+
+    # PRC on right side
+    prc_card = a.get("prc", "—")
+    prc_x = W / 2 + 30
+    c.setFillColor(MUTED)
+    c.setFont("Helvetica", 6.5)
+    c.drawString(prc_x, y + 4, "PLANETARY RULING CARD")
+
+    c.setFillColor(suit_color(prc_card))
+    c.setFont("Helvetica-Bold", 28)
+    c.drawString(prc_x, y - 26, prc_card)
+
+    prc_title = a.get("prc_description", {}).get("title", "") if a.get("prc_description") else ""
+    if prc_title:
+        c.setFillColor(INK)
+        c.setFont("Helvetica-Bold", 11)
+        c.drawString(prc_x, y - 44, prc_title)
+
+    prc_core = (a.get("prc_description", {}).get("core_identity", "") or "")[:120]
+    if prc_core:
+        c.setFillColor(MUTED)
+        c.setFont("Helvetica", 7.5)
+        words = prc_core.split()
+        lines, line = [], ""
+        for w in words:
+            test = line + w + " "
+            if c.stringWidth(test, "Helvetica", 7.5) > 220:
+                lines.append(line)
+                line = w + " "
+            else:
+                line = test
+        if line: lines.append(line)
+        for i, ln in enumerate(lines[:3]):
+            c.drawString(prc_x, y - 58 - i * 11, ln)
+
+    # ── DIVIDER ──
+    div1 = y - 95
+    c.setStrokeColor(HexColor("#c8c0b0"))
+    c.setLineWidth(0.5)
+    c.line(36, div1, W - 36, div1)
+
+    # ── SECTION: Active Period ──
+    y2 = div1 - 18
+    c.setFillColor(MUTED)
+    c.setFont("Helvetica", 6.5)
+    c.drawString(36, y2, "ACTIVE PERIOD")
+
+    planet_name = ap.get("planet", "—")
+    ap_card = ap.get("bc_card", "—")
+    c.setFillColor(PRUSSIAN)
+    c.setFont("Helvetica-Bold", 18)
+    c.drawString(36, y2 - 22, f"{planet_name}  ·  {ap_card}")
+
+    domain = ap.get("domain", "")
+    if domain:
+        c.setFillColor(MUTED)
+        c.setFont("Helvetica", 8)
+        c.drawString(36, y2 - 36, domain)
+
+    # Three-lens interpretation
+    ib = ap.get("interpretation_bc") or {}
+    lens_y = y2 - 56
+    for label_name, key in [("UNDER", "under"), ("SWEET SPOT", "sweet_spot"), ("OVER", "over")]:
+        text = ib.get(key, "")
+        if not text:
+            continue
+        c.setFillColor(CRIMSON)
+        c.setFont("Helvetica-Bold", 6)
+        c.drawString(36, lens_y, label_name)
+
+        c.setFillColor(INK)
+        c.setFont("Helvetica", 7.5)
+        # Word wrap the interpretation text
+        words = text.split()
+        lines, line = [], ""
+        for w in words:
+            test = line + w + " "
+            if c.stringWidth(test, "Helvetica", 7.5) > (W - 80):
+                lines.append(line)
+                line = w + " "
+            else:
+                line = test
+        if line: lines.append(line)
+        for i, ln in enumerate(lines[:2]):
+            c.drawString(36, lens_y - 11 - i * 10, ln)
+        lens_y -= 11 + min(len(lines), 2) * 10 + 8
+
+    # ── DIVIDER ──
+    div2 = lens_y - 6
+    c.setStrokeColor(HexColor("#c8c0b0"))
+    c.line(36, div2, W - 36, div2)
+
+    # ── SECTION: Planetary Periods ──
+    y3 = div2 - 18
+    c.setFillColor(MUTED)
+    c.setFont("Helvetica", 6.5)
+    c.drawString(36, y3, "PLANETARY PERIODS")
+
+    planets = ["Mercury", "Venus", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune"]
+    periods = bc.get("periods", {})
+
+    col1_x, col2_x = 36, W / 2 + 20
+    row_h = 22
+    for i, p in enumerate(planets):
+        col = col1_x if i < 4 else col2_x
+        row = i if i < 4 else i - 4
+        py = y3 - 20 - row * row_h
+        card = periods.get(p, "—")
+        is_active = p == planet_name
+
+        if is_active:
+            c.setFillColor(PRUSSIAN)
+            c.rect(col - 4, py - 5, 240, 18, fill=1, stroke=0)
+
+        c.setFillColor(white if is_active else MUTED)
+        c.setFont("Helvetica", 7.5)
+        c.drawString(col, py, p.upper())
+
+        c.setFillColor(white if is_active else suit_color(card))
+        c.setFont("Helvetica-Bold", 11)
+        c.drawString(col + 100, py, card)
+
+        if is_active:
+            c.setFillColor(CRIMSON)
+            c.setFont("Helvetica-Bold", 6)
+            c.drawString(col + 100 + c.stringWidth(card + "  ", "Helvetica-Bold", 11), py, "NOW")
+
+    # Pluto + Result below periods
+    pluto_y = y3 - 20 - 4 * row_h - 8
+    c.setFillColor(MUTED)
+    c.setFont("Helvetica", 7)
+    c.drawString(36, pluto_y, f"Pluto: ")
+    c.setFillColor(suit_color(bc.get("pluto")))
+    c.setFont("Helvetica-Bold", 9)
+    c.drawString(36 + 35, pluto_y, bc.get("pluto", "—"))
+
+    c.setFillColor(MUTED)
+    c.setFont("Helvetica", 7)
+    c.drawString(160, pluto_y, f"Result: ")
+    c.setFillColor(suit_color(bc.get("result")))
+    c.setFont("Helvetica-Bold", 9)
+    c.drawString(160 + 38, pluto_y, bc.get("result", "—"))
+
+    # ── DIVIDER ──
+    div3 = pluto_y - 14
+    c.setStrokeColor(HexColor("#c8c0b0"))
+    c.line(36, div3, W - 36, div3)
+
+    # ── SECTION: Yearly Atmosphere ──
+    y4 = div3 - 18
+    c.setFillColor(MUTED)
+    c.setFont("Helvetica", 6.5)
+    c.drawString(36, y4, "YEARLY ATMOSPHERE")
+
+    env_card = karma.get("environment", "—") if karma else "—"
+    disp_card = karma.get("displacement", "—") if karma else "—"
+    lr_card = lr.get("card", "—") if lr else "—"
+    lr_planet = lr.get("planet", "—") if lr else "—"
+
+    # Environment
+    c.setFillColor(INK)
+    c.setFont("Helvetica", 8)
+    c.drawString(36, y4 - 20, "Environment")
+    c.setFillColor(suit_color(env_card))
+    c.setFont("Helvetica-Bold", 18)
+    c.drawString(36, y4 - 40, env_card)
+
+    # Displacement
+    c.setFillColor(INK)
+    c.setFont("Helvetica", 8)
+    c.drawString(180, y4 - 20, "Displacement")
+    c.setFillColor(suit_color(disp_card))
+    c.setFont("Helvetica-Bold", 18)
+    c.drawString(180, y4 - 40, disp_card)
+
+    # Long Range
+    c.setFillColor(INK)
+    c.setFont("Helvetica", 8)
+    c.drawString(340, y4 - 20, "Long Range")
+    c.setFillColor(suit_color(lr_card))
+    c.setFont("Helvetica-Bold", 18)
+    c.drawString(340, y4 - 40, lr_card)
+    c.setFillColor(MUTED)
+    c.setFont("Helvetica", 7)
+    c.drawString(340 + c.stringWidth(lr_card + " ", "Helvetica-Bold", 18), y4 - 38, lr_planet)
+
+    # ── BOTTOM BAR ──
+    c.setFillColor(PRUSSIAN)
+    c.rect(0, 0, W, 44, fill=1, stroke=0)
+    c.setFillColor(HexColor("#ffffff70"))
+    c.setFont("Helvetica", 7)
+    c.drawCentredString(W / 2, 20, "The Analog Algorithm  ·  Mathematical Pattern Recognition  ·  theanalogalgorithm.com")
+
+    # ── Crimson accent line at top of bottom bar ──
+    c.setStrokeColor(CRIMSON)
+    c.setLineWidth(2)
+    c.line(0, 44, W, 44)
+
+    c.save()
+    buf.seek(0)
+
+    from flask import send_file
+    card_name = bc_card.replace("♥", "H").replace("♦", "D").replace("♣", "C").replace("♠", "S")
+    return send_file(
+        buf,
+        mimetype="application/pdf",
+        as_attachment=True,
+        download_name=f"blueprint_{card_name}.pdf"
+    )
+
+
+# ---------------------------------------------------------------------------
 # Dev login bypass (remove in production)
 # ---------------------------------------------------------------------------
 @app.route("/dev-login")

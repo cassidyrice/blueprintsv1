@@ -347,11 +347,15 @@
         </div>
 
 
-        <!-- SHARE BUTTON -->
-        <div class="animate-in" style="animation-delay:0.32s;margin-top:14px;display:flex;gap:10px;align-items:center">
+        <!-- SHARE + DOWNLOAD BUTTONS -->
+        <div class="animate-in" style="animation-delay:0.32s;margin-top:14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
           <button class="btn btn-primary" onclick="shareBlueprint()" id="shareBtn" style="display:flex;align-items:center;gap:8px">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
             Share Blueprint
+          </button>
+          <button class="btn btn-primary" onclick="downloadPDF()" id="pdfBtn" style="display:flex;align-items:center;gap:8px;background:var(--ink)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Download PDF
           </button>
           <span id="shareStatus" style="font-size:0.65rem;color:var(--muted)"></span>
         </div>
@@ -502,6 +506,7 @@ async function runBlueprint() {
   const data = await res.json();
   document.getElementById('bp-loading').classList.remove('show');
   if (data.error) { alert(data.error); return; }
+  window._bp = data;
   renderBlueprint(data);
   document.getElementById('bp-results').classList.remove('hidden');
   if (TIER==='deepread'||TIER==='practitioner') fetchSummary(data);
@@ -599,6 +604,43 @@ function renderCompatibility(data) {
   ov.karma_crossover?.forEach(k=>items.push({icon:'↔',text:`Karma crossover: ${k}`}));
   if(!items.length) items.push({icon:'—',text:'No direct card overlaps detected this year.'});
   document.getElementById('overlayItems').innerHTML=items.map(i=>`<div class="overlay-item"><span class="overlay-icon">${i.icon}</span><span>${i.text}</span></div>`).join('');
+}
+
+// ── DOWNLOAD PDF ─────────────────────────────────────────────────────────
+async function downloadPDF() {
+  if (!window._bp) return;
+  const btn = document.getElementById('pdfBtn');
+  const status = document.getElementById('shareStatus');
+  btn.disabled = true;
+  status.textContent = 'Generating PDF...';
+
+  try {
+    const res = await fetch('/download-pdf', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({blueprint: window._bp})
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      status.textContent = err.error || 'PDF generation failed';
+      btn.disabled = false;
+      return;
+    }
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    const cd = res.headers.get('Content-Disposition') || '';
+    const match = cd.match(/filename=(.+)/);
+    link.download = match ? match[1] : 'blueprint.pdf';
+    link.href = url;
+    link.click();
+    URL.revokeObjectURL(url);
+    status.textContent = 'PDF downloaded!';
+  } catch(e) {
+    status.textContent = 'Error generating PDF';
+  }
+  btn.disabled = false;
+  setTimeout(() => status.textContent = '', 3000);
 }
 
 // ── SHARE BLUEPRINT ─────────────────────────────────────────────────────────
